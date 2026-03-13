@@ -1,10 +1,10 @@
 import {createApp} from "vue";
 import App from "./App.vue";
+import router from "./router";
 // bootstrap
-import {createBootstrap} from "bootstrap-vue-next";
-import "bootstrap/dist/css/bootstrap.css";
-import "bootstrap-vue-next/dist/bootstrap-vue-next.css";
-
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import "bootstrap-icons/font/bootstrap-icons.css";
 const app = createApp(App);
-app.use(createBootstrap());
+app.use(router);
 app.mount("#app");

@@ -1,0 +1,1 @@
+<template>MenuView.vue</template>
