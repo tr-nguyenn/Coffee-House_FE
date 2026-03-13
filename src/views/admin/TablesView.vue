@@ -1,0 +1,1 @@
+<template>TablesView.vue</template>

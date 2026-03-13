@@ -20,7 +20,23 @@ const router = createRouter({
         },
       ],
     },
-    // Sau này các trang Admin sẽ nằm ở một cụm khác dùng AdminLayout
+    {
+      path: "/admin",
+      component: () => import("@/layouts/AdminLayout.vue"),
+      children: [
+        {
+          path: "tables",
+          name: "admin-tables",
+          component: () => import("@/views/admin/TablesView.vue"),
+        },
+        {
+          path: "products",
+          name: "admin-products",
+          component: () => import("@/views/admin/ProductsView.vue"),
+        },
+      ],
+    },
+
     {
       path: "/login",
       name: "login",

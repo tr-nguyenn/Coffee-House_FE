@@ -1,0 +1,1 @@
+<template>ProductsView.vue</template>

@@ -49,7 +49,7 @@ const handleSearch = () => {
 
         <div class="d-flex align-items-center gap-2 ms-xl-auto">
           <router-link to="/register" class="btn btn-link text-light text-decoration-none px-3" @click="closeMenu"> Đăng ký </router-link>
-          <router-link to="/login" class="btn btn-warning px-4 rounded-pill fw-bold" @click="closeMenu"> Đăng nhập </router-link>
+          <router-link to="/login" class="btn btn-warning px-3 rounded-pill fw-bold" @click="closeMenu"> Đăng nhập </router-link>
         </div>
       </div>
     </div>
