@@ -43,7 +43,7 @@ const handleSearch = () => {
         <form class="d-flex my-3 my-xl-0 flex-grow-1 justify-content-start justify-content-xl-center" @submit.prevent="handleSearch">
           <div class="input-group search-box w-100 w-xl-75">
             <input v-model="searchQuery" type="text" class="form-control bg-secondary text-white border-0" placeholder="Tìm món bạn thích..." />
-            <button class="btn btn-warning" type="submit">Tìm</button>
+            <button class="btn btn-warning" type="submit"><i class="bi bi-search"></i></button>
           </div>
         </form>
 
