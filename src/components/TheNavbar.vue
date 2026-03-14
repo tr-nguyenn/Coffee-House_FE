@@ -23,7 +23,7 @@ const handleSearch = () => {
   <nav class="navbar navbar-expand-xl navbar-dark bg-dark sticky-top shadow-sm py-4">
     <div class="container-fluid px-lg-5">
       <router-link class="navbar-brand me-4" to="/" @click="closeMenu">
-        <AppLogo size="32" />
+        <AppLogo size="30" />
       </router-link>
 
       <button class="navbar-toggler" type="button" @click="toggleMenu">
