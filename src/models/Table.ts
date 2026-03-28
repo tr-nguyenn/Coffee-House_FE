@@ -17,4 +17,6 @@ export interface TableStatusDto {
   areaName: string;
   isInUse: boolean;
   activeOrderId: string | null;
+  activeOrderTime: Date;
+  displayOrder: number;
 }

@@ -1,9 +1,9 @@
 <template>
   <div class="d-flex flex-column h-100 bg-white">
-    <div class="p-3 border-bottom bg-light flex-shrink-0 shadow-sm z-1">
-      <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="p-2 border-bottom bg-light flex-shrink-0 shadow-sm z-1">
+      <div class="d-flex justify-content-between align-items-center mb-2">
         <span class="fs-5 fw-bold text-dark"
-          ><i class="bi bi-grid-fill me-2 text-primary"></i>Sơ đồ bàn</span
+          ><i class="bi bi-grid-fill mx-2 text-primary"></i>Sơ đồ bàn</span
         >
         <button
           class="btn btn-sm btn-outline-secondary rounded-circle"
@@ -55,7 +55,7 @@
           @click="selectTakeaway"
         >
           <div
-            class="card-body p-3 d-flex align-items-center justify-content-center gap-3 bg-white border border-warning border-2 rounded-4"
+            class="card-body p-2 d-flex align-items-center justify-content-center gap-3 bg-white border border-warning border-2 rounded-4"
           >
             <div
               class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center"
@@ -64,10 +64,8 @@
               <i class="bi bi-bag-check-fill fs-4"></i>
             </div>
             <div class="text-start flex-grow-1">
-              <h6
-                class="fw-bolder text-dark mb-0 text-uppercase letter-spacing-1"
-              >
-                Khách Mua Mang Đi
+              <h6 class="fw-bolder text-dark mb-0 letter-spacing-1">
+                Khách mua mang đi
               </h6>
               <small class="text-secondary fw-semibold">Không cần bàn</small>
             </div>
@@ -94,7 +92,7 @@
               class="bg-primary rounded-pill me-2"
               style="width: 5px; height: 20px"
             ></div>
-            <h6 class="fw-bolder text-dark text-uppercase mb-0">
+            <h6 class="fw-bolder text-dark  mb-0">
               {{ areaName }}
             </h6>
             <span class="badge bg-white text-secondary ms-2 border shadow-sm"
@@ -210,7 +208,6 @@ const getElapsedTime = (activeOrderTime?: string | Date) => {
   if (hours > 0) return `${hours}g ${mins}p`;
   return `${mins} phút`;
 };
-// ---------------------
 
 const uniqueAreas = computed(() => {
   const areas = tables.value.map((t) => t.areaName);
@@ -229,6 +226,14 @@ const filteredGroupedTables = computed(() => {
       groups[area]!.push(t);
     }
   });
+
+  for (const key in groups) {
+    groups[key]!.sort((a, b) => {
+      const orderA = a.displayOrder !== undefined ? a.displayOrder : 9999;
+      const orderB = b.displayOrder !== undefined ? b.displayOrder : 9999;
+      return orderA - orderB;
+    });
+  }
 
   return groups;
 });
@@ -256,7 +261,6 @@ const selectTakeaway = () => {
 
 onMounted(() => {
   fetchTables();
-  // Khởi động đồng hồ
   timerInterval = setInterval(() => {
     currentTime.value = new Date();
   }, 30000);
@@ -283,13 +287,11 @@ defineExpose({fetchTables, tables});
   letter-spacing: 0.5px;
 }
 
-/* --- THIẾT KẾ THẺ BÀN SOFT UI --- */
 .table-card {
   background-color: #ffffff;
-  min-height: 100px; /* Nhỏ gọn lại */
+  min-height: 100px;
 }
 
-/* 1. Trống */
 .card-empty {
   border-color: #bbf7d0 !important;
   background-color: #f0fdf4;
@@ -299,7 +301,6 @@ defineExpose({fetchTables, tables});
   transform: translateY(-2px);
 }
 
-/* 2. Có khách */
 .card-occupied {
   border-color: #fecaca !important;
   background-color: #fef2f2;
@@ -309,16 +310,15 @@ defineExpose({fetchTables, tables});
   transform: translateY(-2px);
 }
 
-/* --- HIỆU ỨNG KHI ĐƯỢC CHỌN (SÁNG LÊN) --- */
 .selected-table {
   box-shadow: 0 0 0 3px #3b82f6, 0 8px 16px rgba(59, 130, 246, 0.2) !important;
   border-color: transparent !important;
-  background-color: #eff6ff !important; /* Đổi nền xanh nhạt khi chọn */
+  background-color: #eff6ff !important;
 }
 
 .selected-takeaway .card-body {
   box-shadow: 0 0 0 3px #f59e0b, 0 8px 16px rgba(245, 158, 11, 0.2) !important;
-  background-color: #fffbeb !important; /* Đổi nền vàng nhạt khi chọn Takeaway */
+  background-color: #fffbeb !important;
 }
 
 .transform-active {
@@ -326,7 +326,6 @@ defineExpose({fetchTables, tables});
   z-index: 10;
 }
 
-/* Takeaway chung */
 .takeaway-card .card-body {
   transition: all 0.2s;
 }
@@ -335,7 +334,6 @@ defineExpose({fetchTables, tables});
   transform: translateY(-2px);
 }
 
-/* Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   height: 6px;
   width: 6px;

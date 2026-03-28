@@ -1,127 +1,230 @@
 <template>
   <div class="d-flex flex-column h-100 bg-white">
-    
-    <div class="flex-shrink-0 mx-2 p-3 shadow-sm d-flex justify-content-between align-items-center z-2"
-         :class="selectedTable?.tableId === 'TAKEAWAY' ? 'bg-warning text-dark' : (selectedTable ? 'bg-dark text-white' : 'bg-secondary text-white')">
-      <h5 class="mb-0 fw-bold">
-        <i class="bi" :class="selectedTable?.tableId === 'TAKEAWAY' ? 'bi-bag-check-fill' : 'bi-geo-alt-fill'"></i>
-        {{ selectedTable ? ` ${selectedTable.tableName}` : "CHƯA CHỌN BÀN" }}
-      </h5>
-      
+    <div
+      class="flex-shrink-0 p-2 shadow-sm d-flex justify-content-between align-items-center z-2 rounded-bottom"
+      :class="
+        selectedTable?.tableId === 'TAKEAWAY'
+          ? 'bg-warning text-dark'
+          : selectedTable
+          ? 'bg-dark text-white'
+          : 'bg-secondary text-white'
+      "
+    >
+      <h6 class="mb-0 fw-bold">
+        <i
+          class="bi"
+          :class="
+            selectedTable?.tableId === 'TAKEAWAY'
+              ? 'bi-bag-check-fill'
+              : 'bi-geo-alt-fill'
+          "
+        ></i>
+        {{ selectedTable ? ` ${selectedTable.tableName}` : "Chưa chọn bàn" }}
+      </h6>
+
       <div v-if="selectedTable && selectedTable.tableId !== 'TAKEAWAY'">
-        <span v-if="selectedTable.isInUse" class="badge bg-danger me-2">Có Khách</span>
-        <span v-else class="badge bg-success me-2">Bàn Trống</span>
-        
-        <button v-if="selectedTable.isInUse" class="btn btn-sm btn-outline-light rounded-pill" @click="handleChangeTable">
-          <i class="bi bi-arrow-left-right"></i> Chuyển
-        </button>
+        <span v-if="selectedTable.isInUse" class="badge bg-danger"
+          >Có Khách</span
+        >
+        <span v-else class="badge bg-success">Trống</span>
       </div>
     </div>
 
-    <div v-if="selectedTable" class="p-2 bg-light border-bottom z-3">
-      <div class="row g-2">
-        
-        <div class="col-12 position-relative">
-          
-          <div v-if="selectedCustomer" class="d-flex justify-content-between align-items-center p-2 bg-success bg-opacity-10 border border-success rounded">
-            <div class="d-flex align-items-center">
-              <i class="bi bi-person-check-fill text-success fs-4 me-2"></i>
-              <div>
-                <div class="fw-bold text-dark" style="font-size: 0.9rem;">{{ selectedCustomer.fullName }}</div>
-                <div class="small text-muted">
-                  {{ selectedCustomer.phoneNumber }}
-                  <span class="badge bg-warning text-dark border border-warning ms-1">{{ selectedCustomer.rewardPoints }} điểm</span>
-                </div>
-              </div>
+    <div v-if="selectedTable" class="px-2 py-2 bg-light border-bottom z-3">
+      <div class="d-flex gap-2">
+        <div class="position-relative" style="flex: 5.5">
+          <div
+            v-if="selectedCustomer"
+            class="d-flex justify-content-between align-items-center px-2 py-1 bg-success bg-opacity-10 border border-success rounded h-100"
+          >
+            <div class="d-flex align-items-center min-w-0">
+              <i class="bi bi-person-check-fill text-success me-2"></i>
+              <span class="fw-bold text-dark small text-truncate">{{
+                selectedCustomer.fullName
+              }}</span>
+              <span class="badge bg-warning text-dark ms-2 flex-shrink-0"
+                >{{ selectedCustomer.rewardPoints || 0 }} đ</span
+              >
             </div>
-            <button class="btn btn-sm btn-close" @click="clearCustomer" title="Hủy chọn"></button>
+            <button
+              class="btn btn-sm btn-link text-danger p-0 ms-2 flex-shrink-0"
+              @click="clearCustomer"
+            >
+              <i class="bi bi-x-circle-fill"></i>
+            </button>
           </div>
 
-          <div v-else>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
-              <input type="text" class="form-control" 
-                     placeholder="Tìm Tên hoặc SĐT Khách hàng..." 
-                     v-model="searchQuery" 
-                     @input="handleSearch"
-                     @focus="showDropdown = true"
-                     @blur="hideDropdownDelay">
-            </div>
-
-            <ul v-if="showDropdown && searchQuery" class="dropdown-menu show w-100 position-absolute shadow-lg" style="top: 100%; z-index: 1050;">
-              <li v-if="isSearching" class="dropdown-item text-center text-muted small py-2">
-                <div class="spinner-border spinner-border-sm text-primary me-1" role="status"></div> Đang tìm...
-              </li>
-              
-              <li v-for="c in suggestedCustomers" :key="c.id" @click="selectCustomer(c)">
-                <a class="dropdown-item cursor-pointer d-flex justify-content-between align-items-center">
-                  <div>
-                    <div class="fw-bold text-dark"><i class="bi bi-person text-primary me-1"></i> {{ c.fullName }}</div>
-                    <div class="text-muted small">{{ c.phoneNumber }}</div>
-                  </div>
-                  <span class="badge bg-warning text-dark border border-warning">{{ c.rewardPoints }} điểm</span>
-                </a>
-              </li>
-
-              <li v-if="!isSearching && suggestedCustomers.length === 0">
-                <a class="dropdown-item text-primary cursor-pointer fw-bold py-2" @click="openAddCustomerModal">
-                  <i class="bi bi-plus-circle-fill me-1"></i> Thêm khách mới: "{{ searchQuery }}"
-                </a>
-              </li>
-            </ul>
+          <div v-else class="input-group input-group-sm h-100">
+            <span class="input-group-text bg-white border-end-0 pe-1"
+              ><i class="bi bi-person text-muted"></i
+            ></span>
+            <input
+              type="text"
+              class="form-control border-start-0 ps-1"
+              placeholder="Tìm tên/SĐT khách..."
+              v-model="searchQuery"
+              @input="handleSearch"
+              @focus="showDropdown = true"
+              @blur="hideDropdownDelay"
+            />
           </div>
+
+          <ul
+            v-if="showDropdown && searchQuery"
+            class="dropdown-menu show w-100 position-absolute shadow-sm"
+            style="top: 100%; z-index: 1050; font-size: 0.85rem"
+          >
+            <li
+              v-if="isSearching"
+              class="dropdown-item text-center text-muted py-1"
+            >
+              <div
+                class="spinner-border spinner-border-sm text-primary"
+                role="status"
+              ></div>
+            </li>
+            <li
+              v-for="c in suggestedCustomers"
+              :key="c.id"
+              @click="selectCustomer(c)"
+            >
+              <a
+                class="dropdown-item cursor-pointer py-1 d-flex justify-content-between align-items-center"
+              >
+                <span class="text-truncate"
+                  >{{ c.fullName }} - {{ c.phoneNumber }}</span
+                >
+                <span class="badge bg-warning text-dark flex-shrink-0"
+                  >{{ c.rewardPoints || 0 }} đ</span
+                >
+              </a>
+            </li>
+            <li v-if="!isSearching && suggestedCustomers.length === 0">
+              <a
+                class="dropdown-item text-primary cursor-pointer fw-bold py-1"
+                @click="openAddCustomerModal"
+              >
+                <i class="bi bi-plus-circle"></i> Thêm mới
+              </a>
+            </li>
+          </ul>
         </div>
-        <div class="col-12">
-          <div class="input-group input-group-sm">
-            <span class="input-group-text bg-white"><i class="bi bi-ticket-perforated-fill text-muted"></i></span>
-            <input type="text" class="form-control" placeholder="Mã Voucher giảm giá" v-model="voucherCode">
-            <button class="btn btn-dark" @click="applyVoucher">Áp dụng</button>
-          </div>
+
+        <div class="input-group input-group-sm" style="flex: 4.5">
+          <span class="input-group-text bg-white border-end-0 pe-1"
+            ><i class="bi bi-ticket-perforated text-muted"></i
+          ></span>
+          <input
+            type="text"
+            class="form-control border-start-0 ps-1"
+            placeholder="Mã Voucher..."
+            v-model="voucherCode"
+          />
         </div>
       </div>
     </div>
 
-    <div class="flex-grow-1 overflow-auto bg-light custom-scrollbar p-2">
-      <div v-if="!existingOrder && cart.length === 0" class="text-center text-muted py-5 mt-5">
-        <i class="bi bi-cart-x display-1 opacity-25"></i>
-        <h5 class="mt-3">Chưa có món nào</h5>
+    <div class="flex-grow-1 overflow-auto bg-white custom-scrollbar px-2 py-1">
+      <div
+        v-if="!existingOrder && cart.length === 0"
+        class="text-center text-muted py-5 mt-4"
+      >
+        <i class="bi bi-cart-x display-3 opacity-25"></i>
+        <h6 class="mt-2">Giỏ hàng trống</h6>
       </div>
 
       <div v-else>
         <div v-if="existingItems.length > 0" class="mb-3">
-          <h6 class="text-muted fw-bold mb-2 small"><i class="bi bi-clock-history"></i> ĐÃ GỌI ({{existingItems.length}})</h6>
-          <div v-for="item in existingItems" :key="item.id || item.productId" class="card shadow-sm mb-2 border-0 border-start border-4 border-success">
-            <div class="card-body p-2 d-flex justify-content-between align-items-center">
-              <div>
-                <div class="fw-bold">{{ item.productName || item.name || 'Món' }}</div>
-                <div class="text-muted small">{{ formatVND(item.unitPrice || item.price) }} x {{ item.quantity }}</div>
-                <div v-if="item.note" class="text-secondary small fst-italic">Ghi chú: {{ item.note }}</div>
+          <h6 class="text-muted fw-bold mb-1 small px-1 bg-light py-1 rounded">
+            <i class="bi bi-clock-history"></i> MÓN ĐÃ GỌI ({{
+              existingItems.length
+            }})
+          </h6>
+          <div
+            v-for="item in existingItems"
+            :key="item.id || item.productId"
+            class="d-flex justify-content-between align-items-center py-2 border-bottom"
+          >
+            <div class="text-truncate pe-2">
+              <div class="fw-bold text-dark small text-truncate">
+                {{ item.productName || item.name || "Món" }}
               </div>
-              <div class="fw-bold text-success">{{ formatVND(item.unitPrice * item.quantity) }}</div>
+              <div class="text-muted" style="font-size: 0.75rem">
+                {{ formatVND(item.unitPrice || item.price) }} x
+                {{ item.quantity }}
+              </div>
+            </div>
+            <div class="fw-bold text-success small text-nowrap">
+              {{ formatVND(item.unitPrice * item.quantity) }}
             </div>
           </div>
         </div>
 
         <div v-if="cart.length > 0">
-          <h6 class="text-muted fw-bold mb-2 small"><i class="bi bi-cart-plus"></i> MÓN MỚI ({{cart.length}})</h6>
-          <div v-for="item in cart" :key="item.productId" class="card shadow-sm mb-2 border-0 border-start border-4 border-warning">
-            <div class="card-body p-2 d-flex justify-content-between align-items-start">
-              <div class="flex-grow-1">
-                <div class="fw-bold text-dark">{{ item.name }}</div>
-                <div class="d-flex align-items-center mt-1 mb-1">
-                  <div class="input-group input-group-sm" style="width: 100px;">
-                    <button class="btn btn-outline-secondary" @click="item.quantity > 1 ? item.quantity-- : emit('remove-item', item)">-</button>
-                    <input type="number" class="form-control text-center px-1" v-model="item.quantity" min="1">
-                    <button class="btn btn-outline-secondary" @click="item.quantity++">+</button>
-                  </div>
-                  <span class="text-muted small ms-2">x {{ formatVND(item.unitPrice) }}</span>
-                </div>
-                <input type="text" class="form-control form-control-sm mt-1" placeholder="Ghi chú (Tùy chọn)" v-model="item.note">
+          <h6
+            class="text-muted fw-bold mb-1 small px-1 bg-warning bg-opacity-10 py-1 rounded text-warning"
+          >
+            <i class="bi bi-cart-plus"></i> MÓN MỚI ({{ cart.length }})
+          </h6>
+          <div
+            v-for="item in cart"
+            :key="item.productId"
+            class="py-2 border-bottom position-relative item-row"
+          >
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <div
+                class="fw-bold text-dark small text-truncate pe-2 flex-grow-1"
+              >
+                {{ item.name }}
               </div>
-              <div class="d-flex flex-column align-items-end ms-2">
-                <div class="fw-bold text-warning mb-2">{{ formatVND(item.unitPrice * item.quantity) }}</div>
-                <button class="btn btn-sm btn-outline-danger" @click="emit('remove-item', item)" title="Xóa món">
-                  <i class="bi bi-trash"></i>
+              <div class="fw-bold text-danger small text-nowrap">
+                {{ formatVND(item.unitPrice * item.quantity) }}
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+              <div
+                class="input-group input-group-sm qty-group"
+                style="width: 85px"
+              >
+                <button
+                  class="btn btn-outline-secondary px-2 py-0"
+                  @click="
+                    item.quantity > 1
+                      ? item.quantity--
+                      : emit('remove-item', item)
+                  "
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  class="form-control text-center p-0 fw-bold"
+                  v-model="item.quantity"
+                  min="1"
+                  style="height: 24px"
+                />
+                <button
+                  class="btn btn-outline-secondary px-2 py-0"
+                  @click="item.quantity++"
+                >
+                  +
+                </button>
+              </div>
+
+              <div class="d-flex gap-1">
+                <input
+                  type="text"
+                  class="form-control form-control-sm border-0 bg-light px-2 py-0"
+                  style="width: 120px; height: 24px; font-size: 0.75rem"
+                  placeholder="+ Ghi chú"
+                  v-model="item.note"
+                />
+                <button
+                  class="btn btn-sm btn-link text-danger p-0 px-1"
+                  @click="emit('remove-item', item)"
+                >
+                  <i class="bi bi-trash-fill"></i>
                 </button>
               </div>
             </div>
@@ -130,63 +233,76 @@
       </div>
     </div>
 
-    <div class="flex-shrink-0 bg-white shadow-lg p-3 z-3 border-top">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="fs-5 fw-bold text-muted">TỔNG CỘNG</span>
-        <span class="fs-3 fw-bolder text-danger">{{ formatVND(totalAmount) }}</span>
+    <div class="flex-shrink-0 bg-white shadow-lg p-2 z-3 border-top">
+      <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+        <span class="fw-bold text-muted small">TỔNG TIỀN</span>
+        <span class="fs-4 fw-bolder text-danger lh-1">{{
+          formatVND(totalAmount)
+        }}</span>
       </div>
-      
-      <div v-if="selectedTable" class="row g-2">
+
+      <div v-if="selectedTable" class="row g-1">
         <template v-if="selectedTable.tableId !== 'TAKEAWAY'">
           <div class="col-12" v-if="!selectedTable.isInUse">
-            <button class="btn btn-primary w-100 py-3 fw-bold fs-5 shadow-sm" @click="emit('open-table')">
-              <i class="bi bi-unlock-fill me-2"></i> MỞ BÀN
+            <button
+              class="btn btn-primary w-100 py-2 fw-bold shadow-sm"
+              @click="emit('open-table')"
+            >
+              <i class="bi bi-unlock-fill me-1"></i> MỞ BÀN
             </button>
-            <div class="text-center text-muted small mt-2">Vui lòng Mở Bàn trước khi gọi món</div>
           </div>
-          
-          <template v-else>
-            <!-- UI Phương thức thanh toán (chỉ hiện nếu có món hoặc đơn cũ) -->
-            <div class="col-12 mb-2" v-if="cart.length > 0 || existingOrder">
-              <label class="form-label small fw-bold text-muted mb-1">Phương thức thanh toán</label>
-              <select class="form-select bg-light" v-model="selectedPaymentMethod">
-                <option value="Cash">Tiền mặt</option>
-                <option value="Banking">Chuyển khoản / QR Code</option>
-                <option value="Card">Thẻ / Ví điện tử</option>
-              </select>
-            </div>
 
-            <div class="col-6" v-if="cart.length > 0">
-              <button class="btn btn-warning w-100 py-2 fw-bold text-dark shadow-sm" @click="emit('send-to-kitchen', getCheckoutPayload())">
-                <i class="bi bi-bell-fill me-1"></i> BÁO BẾP
+          <template v-else>
+            <div
+              class="col-12 d-flex gap-1"
+              v-if="cart.length > 0 || existingOrder"
+            >
+              <select
+                class="form-select form-select-sm bg-light fw-semibold"
+                v-model="selectedPaymentMethod"
+                style="width: 40%"
+              >
+                <option value="Cash">Tiền mặt</option>
+                <option value="Banking">Chuyển khoản</option>
+                <option value="Card">Thẻ / Ví</option>
+              </select>
+
+              <button
+                v-if="cart.length > 0"
+                class="btn btn-warning btn-sm flex-grow-1 fw-bold text-dark shadow-sm"
+                @click="emit('send-to-kitchen', getCheckoutPayload())"
+              >
+                <i class="bi bi-bell-fill"></i> BÁO BẾP
               </button>
-            </div>
-            <div :class="cart.length > 0 ? 'col-6' : 'col-12'" v-if="existingOrder">
-              <button class="btn btn-success w-100 py-2 fw-bold shadow-sm" @click="emit('checkout', getCheckoutPayload())">
-                <i class="bi bi-credit-card-fill me-1"></i> THANH TOÁN
+
+              <button
+                v-if="existingOrder && cart.length === 0"
+                class="btn btn-success btn-sm flex-grow-1 fw-bold shadow-sm"
+                @click="emit('checkout', getCheckoutPayload())"
+              >
+                THANH TOÁN
               </button>
             </div>
           </template>
         </template>
-        
-        <template v-else>
-          <!-- UI Phương thức thanh toán cho Takeaway -->
-          <div class="col-12 mb-2" v-if="cart.length > 0">
-            <label class="form-label small fw-bold text-muted mb-1">Phương thức thanh toán</label>
-            <select class="form-select bg-light" v-model="selectedPaymentMethod">
-              <option value="Cash">Tiền mặt</option>
-              <option value="Banking">Chuyển khoản / QR Code</option>
-              <option value="Card">Thẻ / Ví điện tử</option>
-            </select>
-          </div>
 
-          <div class="col-12" v-if="cart.length > 0">
-            <button class="btn btn-success w-100 py-3 fw-bold fs-5 shadow-sm" @click="emit('send-to-kitchen', getCheckoutPayload())">
-              <i class="bi bi-bag-check-fill me-2"></i> TẠO ĐƠN & THANH TOÁN
+        <template v-else>
+          <div class="col-12 d-flex gap-1" v-if="cart.length > 0">
+            <select
+              class="form-select form-select-sm bg-light fw-semibold"
+              v-model="selectedPaymentMethod"
+              style="width: 40%"
+            >
+              <option value="Cash">Tiền mặt</option>
+              <option value="Banking">Chuyển khoản</option>
+              <option value="Card">Thẻ / Ví</option>
+            </select>
+            <button
+              class="btn btn-success btn-sm flex-grow-1 fw-bold shadow-sm"
+              @click="emit('send-to-kitchen', getCheckoutPayload())"
+            >
+              TẠO ĐƠN
             </button>
-          </div>
-          <div class="col-12 text-center text-muted small mt-2" v-if="cart.length > 0">
-             Đơn mang đi sẽ được đưa trực tiếp vào Bếp
           </div>
         </template>
       </div>
@@ -195,28 +311,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { formatVND } from '@/utils/helpers';
-import type { OrderDetailDto } from './OperationsArea.vue';
-import Swal from 'sweetalert2';
-import { toast } from '@/utils/toast';
-import { userService } from '@/services/UserService';
+import {ref, computed} from "vue";
+import {formatVND} from "@/utils/helpers";
+import type {OrderDetailDto} from "./OperationsArea.vue";
+import {toast} from "@/utils/toast";
+import {userService} from "@/services/UserService";
 
-const props = defineProps<{ selectedTable: any, cart: OrderDetailDto[], existingOrder: any }>();
-const emit = defineEmits(['remove-item', 'send-to-kitchen', 'checkout', 'open-table', 'change-table']);
+const props = defineProps<{
+  selectedTable: any;
+  cart: OrderDetailDto[];
+  existingOrder: any;
+}>();
+const emit = defineEmits([
+  "remove-item",
+  "send-to-kitchen",
+  "checkout",
+  "open-table",
+  "change-table",
+]);
 
-const existingItems = computed(() => {
-  if (!props.existingOrder) return [];
-  return props.existingOrder.orderDetails || [];
-});
+const existingItems = computed(() => props.existingOrder?.orderDetails || []);
 
-const voucherCode = ref('');
-const selectedPaymentMethod = ref('Cash');
+const voucherCode = ref("");
+const selectedPaymentMethod = ref("Cash");
 
-// ==========================================
-// CODE MỚI: XỬ LÝ AUTOTOCOMPLETE KHÁCH HÀNG
-// ==========================================
-const searchQuery = ref('');
+const searchQuery = ref("");
 const isSearching = ref(false);
 const showDropdown = ref(false);
 const suggestedCustomers = ref<any[]>([]);
@@ -226,33 +345,32 @@ let searchTimeout: any = null;
 const handleSearch = () => {
   showDropdown.value = true;
   isSearching.value = true;
-  
   clearTimeout(searchTimeout);
-  
+
   if (!searchQuery.value.trim()) {
     suggestedCustomers.value = [];
     isSearching.value = false;
     return;
   }
 
-  // Chờ 300ms sau khi ngừng gõ mới gọi API
   searchTimeout = setTimeout(async () => {
     try {
-      // Sử dụng UserService chuẩn của hệ thống
-      const res = await userService.getAll({ search: searchQuery.value, pageSize: 15 });
-      const data = res.data || res;
-      suggestedCustomers.value = data.items || [];
+      const res = await userService.getAll({
+        search: searchQuery.value,
+        pageSize: 15,
+      });
+      suggestedCustomers.value = (res.data || res).items || [];
     } catch (error) {
-      console.error('Lỗi tìm khách hàng:', error);
+      console.error(error);
     } finally {
       isSearching.value = false;
     }
-  }, 300); 
+  }, 300);
 };
 
-const selectCustomer = (customer: any) => {
-  selectedCustomer.value = customer;
-  searchQuery.value = ''; 
+const selectCustomer = (c: any) => {
+  selectedCustomer.value = c;
+  searchQuery.value = "";
   showDropdown.value = false;
 };
 
@@ -260,71 +378,63 @@ const clearCustomer = () => {
   selectedCustomer.value = null;
 };
 
-const hideDropdownDelay = () => {
-  setTimeout(() => { showDropdown.value = false; }, 200);
-};
+const hideDropdownDelay = () =>
+  setTimeout(() => {
+    showDropdown.value = false;
+  }, 200);
 
 const openAddCustomerModal = () => {
-  // Logic mở Modal thêm khách hàng sau này code ở đây
-  toast.success(`Tính năng thêm khách: ${searchQuery.value} sẽ sớm ra mắt!`);
+  toast.success(`Thêm khách: ${searchQuery.value} sẽ sớm ra mắt!`);
   showDropdown.value = false;
 };
 
-// ==========================================
-// TẠO PAYLOAD THANH TOÁN (Gồm cả Khách hàng)
-// ==========================================
-const getCheckoutPayload = () => {
-  return {
-    paymentMethod: selectedPaymentMethod.value,
-    customerId: selectedCustomer.value ? selectedCustomer.value.id : null,
-    customerName: selectedCustomer.value ? selectedCustomer.value.fullName : searchQuery.value,
-    customerPhone: selectedCustomer.value ? selectedCustomer.value.phoneNumber : null
-  };
-};
-
-// ==========================================
-
-const applyVoucher = () => {
-  if (!voucherCode.value) return;
-  toast.success(`Đã áp dụng mã: ${voucherCode.value}`);
-};
-
-const handleChangeTable = async () => {
-  const { value: newTableId } = await Swal.fire({
-    title: 'Chuyển Bàn',
-    input: 'select',
-    inputOptions: {
-      'id-ban-2': 'Bàn 2 (Tầng 1)',
-      'id-ban-3': 'Bàn 3 (Tầng 1)',
-    },
-    inputPlaceholder: 'Chọn bàn muốn chuyển đến',
-    showCancelButton: true,
-    confirmButtonText: 'Chuyển ngay',
-    cancelButtonText: 'Hủy'
-  });
-
-  if (newTableId) {
-    toast.success('Chuyển bàn thành công!');
-    emit('change-table'); 
-  }
-};
+const getCheckoutPayload = () => ({
+  paymentMethod: selectedPaymentMethod.value,
+  customerId: selectedCustomer.value?.id || null,
+  customerName: selectedCustomer.value?.fullName || searchQuery.value,
+  customerPhone: selectedCustomer.value?.phoneNumber || null,
+});
 
 const totalAmount = computed(() => {
   let oldTotal = props.existingOrder?.finalAmount || 0;
-  let newTotal = props.cart.reduce((sum, item) => sum + ((item.unitPrice || 0) * Number(item.quantity)), 0);
+  let newTotal = props.cart.reduce(
+    (sum, item) => sum + (item.unitPrice || 0) * Number(item.quantity),
+    0
+  );
   return oldTotal + newTotal;
 });
 </script>
 
 <style scoped>
-.cursor-pointer { cursor: pointer; }
-.custom-scrollbar::-webkit-scrollbar { width: 6px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 4px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.cursor-pointer {
+  cursor: pointer;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+.min-w-0 {
+  min-width: 0;
+}
 
-input[type="number"]::-webkit-inner-spin-button, 
-input[type="number"]::-webkit-outer-spin-button { 
-  -webkit-appearance: none; 
-  margin: 0; 
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.qty-group .btn {
+  border-color: #dee2e6;
+  color: #495057;
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+.qty-group input {
+  border-color: #dee2e6;
+  border-left: 0;
+  border-right: 0;
 }
 </style>
