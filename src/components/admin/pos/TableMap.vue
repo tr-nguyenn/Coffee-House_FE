@@ -1,133 +1,235 @@
 <template>
   <div class="d-flex flex-column h-100 bg-white">
-    
     <div class="p-3 border-bottom bg-light flex-shrink-0 shadow-sm z-1">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="fs-5 fw-bold text-dark"><i class="bi bi-grid-fill me-2 text-primary"></i>Sơ đồ bàn</span>
-        <button class="btn btn-sm btn-outline-secondary rounded-circle" title="Làm mới" @click="fetchTables">
+        <span class="fs-5 fw-bold text-dark"
+          ><i class="bi bi-grid-fill me-2 text-primary"></i>Sơ đồ bàn</span
+        >
+        <button
+          class="btn btn-sm btn-outline-secondary rounded-circle"
+          title="Làm mới"
+          @click="fetchTables"
+        >
           <i class="bi bi-arrow-clockwise"></i>
         </button>
       </div>
 
-      <div class="d-flex overflow-auto custom-scrollbar pb-1 gap-2" style="white-space: nowrap;">
-        <button 
-          class="btn btn-sm rounded-pill fw-bold transition-all" 
-          :class="selectedArea === 'All' ? 'btn-primary' : 'btn-outline-secondary'"
-          @click="selectedArea = 'All'">
+      <div
+        class="d-flex overflow-auto custom-scrollbar pb-1 gap-2"
+        style="white-space: nowrap"
+      >
+        <button
+          class="btn btn-sm rounded-pill fw-bold transition-all"
+          :class="
+            selectedArea === 'All' ? 'btn-primary' : 'btn-outline-secondary'
+          "
+          @click="selectedArea = 'All'"
+        >
           Tất cả
         </button>
-        <button 
-          v-for="area in uniqueAreas" :key="area"
+        <button
+          v-for="area in uniqueAreas"
+          :key="area"
           class="btn btn-sm rounded-pill fw-bold transition-all"
-          :class="selectedArea === area ? 'btn-primary' : 'btn-outline-secondary'"
-          @click="selectedArea = area">
+          :class="
+            selectedArea === area ? 'btn-primary' : 'btn-outline-secondary'
+          "
+          @click="selectedArea = area"
+        >
           {{ area }}
         </button>
       </div>
     </div>
 
-    <div class="flex-grow-1 overflow-auto p-3 custom-scrollbar" style="background-color: #f4f6f9;">
+    <div
+      class="flex-grow-1 overflow-auto p-3 custom-scrollbar"
+      style="background-color: #f8fafc"
+    >
       <div class="mb-4">
-        <div 
+        <div
           class="card text-center cursor-pointer transition-all border-0 rounded-4 shadow-sm takeaway-card"
-          :class="{'ring-3 ring-warning transform-active': selectedTableId === 'TAKEAWAY'}"
-          @click="selectTakeaway">
-          <div class="card-body p-3 d-flex align-items-center justify-content-center gap-3" style="background: linear-gradient(135deg, #2b2b40, #1e1e2d);">
-            <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-              <i class="bi bi-bag-check-fill text-dark fs-5"></i>
+          :class="{
+            'selected-takeaway transform-active':
+              selectedTableId === 'TAKEAWAY',
+          }"
+          @click="selectTakeaway"
+        >
+          <div
+            class="card-body p-3 d-flex align-items-center justify-content-center gap-3 bg-white border border-warning border-2 rounded-4"
+          >
+            <div
+              class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center"
+              style="width: 45px; height: 45px"
+            >
+              <i class="bi bi-bag-check-fill fs-4"></i>
             </div>
-            <div class="text-start">
-              <h6 class="fw-bold text-white mb-0 text-uppercase letter-spacing-1">Khách Mua Mang Đi</h6>
-              <small class="text-secondary">Không cần bàn</small>
+            <div class="text-start flex-grow-1">
+              <h6
+                class="fw-bolder text-dark mb-0 text-uppercase letter-spacing-1"
+              >
+                Khách Mua Mang Đi
+              </h6>
+              <small class="text-secondary fw-semibold">Không cần bàn</small>
             </div>
-            <i class="bi bi-chevron-right text-secondary ms-auto fs-5"></i>
+            <i class="bi bi-chevron-right text-warning fs-5"></i>
           </div>
         </div>
       </div>
 
-      <div v-if="loading" class="d-flex justify-content-center align-items-center py-5">
+      <div
+        v-if="loading"
+        class="d-flex justify-content-center align-items-center py-5"
+      >
         <div class="spinner-border text-primary" role="status"></div>
       </div>
-      
+
       <div v-else>
-        <div v-for="(group, areaName) in filteredGroupedTables" :key="areaName" class="mb-4">
-          
-          <div class="d-flex align-items-center mb-3">
-             <div class="bg-primary rounded-pill me-2" style="width: 6px; height: 24px;"></div>
-             <h6 class="fw-bold text-secondary text-uppercase mb-0">{{ areaName }}</h6>
-             <span class="badge bg-white text-dark ms-2 border shadow-sm">{{ group.length }} bàn</span>
+        <div
+          v-for="(group, areaName) in filteredGroupedTables"
+          :key="areaName"
+          class="mb-5"
+        >
+          <div class="d-flex align-items-center mb-3 ps-1">
+            <div
+              class="bg-primary rounded-pill me-2"
+              style="width: 5px; height: 20px"
+            ></div>
+            <h6 class="fw-bolder text-dark text-uppercase mb-0">
+              {{ areaName }}
+            </h6>
+            <span class="badge bg-white text-secondary ms-2 border shadow-sm"
+              >{{ group.length }} bàn</span
+            >
           </div>
 
-          <div class="row row-cols-3 row-cols-sm-4 row-cols-md-3 row-cols-xl-4 g-3">
+          <div class="row row-cols-3 row-cols-sm-4 row-cols-md-5 g-2">
             <div class="col" v-for="table in group" :key="table.tableId">
-               <div class="card h-100 text-center cursor-pointer transition-all border-2 rounded-4 shadow-sm select-none table-card"
-                    :class="[
-                      table.isInUse ? 'border-danger table-card-danger' : 'border-success table-card-success',
-                      selectedTableId === table.tableId ? 'shadow-lg ring-3 ring-primary transform-active' : ''
-                    ]"
-                    @click="onSelect(table)">
-                 
-                 <div class="card-body p-2 d-flex flex-column justify-content-center align-items-center position-relative">
-                    
-                    <div class="position-absolute top-0 end-0 mt-2 me-2">
-                      <i class="bi" :class="table.isInUse ? 'bi-cup-hot-fill text-danger' : 'bi-check-circle-fill text-success'" style="font-size: 1rem;"></i>
-                    </div>
+              <div
+                class="card h-100 text-center cursor-pointer transition-all border-2 rounded-4 select-none table-card position-relative overflow-hidden"
+                :class="[
+                  table.isInUse ? 'card-occupied' : 'card-empty',
+                  selectedTableId === table.tableId
+                    ? 'selected-table transform-active'
+                    : 'shadow-sm',
+                ]"
+                @click="onSelect(table)"
+              >
+                <div class="position-absolute top-0 end-0 mt-2 me-2">
+                  <i
+                    class="bi fs-6"
+                    :class="
+                      table.isInUse
+                        ? 'bi-cup-hot-fill text-danger'
+                        : 'bi-check2-circle text-success'
+                    "
+                  ></i>
+                </div>
 
-                    <h5 class="fw-bold mt-3 mb-1" :class="table.isInUse ? 'text-danger' : 'text-success'">
-                      {{ table.tableName }}
-                    </h5>
-                    
-                    <span class="badge rounded-pill mb-2 px-3 py-1" 
-                          :class="table.isInUse ? 'bg-danger text-white' : 'bg-success text-white'" 
-                          style="font-size: 0.7rem; font-weight: 600;">
-                      {{ table.isInUse ? 'Có Khách' : 'Trống' }}
-                    </span>
-                 </div>
-               </div>
+                <div
+                  class="card-body p-2 d-flex flex-column justify-content-center align-items-center"
+                >
+                  <h5
+                    class="fw-bolder mt-3 mb-1"
+                    :class="table.isInUse ? 'text-danger' : 'text-success'"
+                    style="font-size: 1.1rem"
+                  >
+                    {{ table.tableName }}
+                  </h5>
+
+                  <span
+                    class="badge rounded-pill mb-1 px-2 py-1"
+                    :class="
+                      table.isInUse
+                        ? 'bg-danger bg-opacity-10 text-danger'
+                        : 'bg-success bg-opacity-10 text-success'
+                    "
+                    style="font-size: 0.7rem; font-weight: 700"
+                  >
+                    {{ table.isInUse ? "Có Khách" : "Trống" }}
+                  </span>
+
+                  <div
+                    v-if="table.activeOrderTime && table.isInUse"
+                    class="text-danger fw-bold mt-1"
+                    style="font-size: 0.75rem"
+                  >
+                    <i class="bi bi-clock-history"></i>
+                    {{ getElapsedTime(table.activeOrderTime) }}
+                  </div>
+                </div>
+              </div>
             </div>
-            
-            <div v-if="group.length === 0" class="col-12 py-2 text-muted fst-italic small">Không có bàn ở khu vực này.</div>
+
+            <div
+              v-if="group.length === 0"
+              class="col-12 py-2 text-muted fst-italic small"
+            >
+              Không có bàn ở khu vực này.
+            </div>
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { tableService } from '@/services/TableService'; 
-import { toast } from '@/utils/toast';
-import type { TableStatusDto } from '@/models/Table';
+import {ref, computed, onMounted, onUnmounted} from "vue";
+import {tableService} from "@/services/TableService";
+import {toast} from "@/utils/toast";
+import type {TableStatusDto} from "@/models/Table";
 
-
-
-const props = defineProps<{ selectedTableId: string | null }>();
-const emit = defineEmits(['select-table', 'select-takeaway']);
+const props = defineProps<{selectedTableId: string | null}>();
+const emit = defineEmits(["select-table", "select-takeaway"]);
 
 const loading = ref(false);
 const tables = ref<TableStatusDto[]>([]);
-const selectedArea = ref<string>('All');
+const selectedArea = ref<string>("All");
+
+// --- LOGIC ĐẾM GIỜ ---
+const currentTime = ref(new Date());
+let timerInterval: ReturnType<typeof setInterval>;
+
+const getElapsedTime = (activeOrderTime?: string | Date) => {
+  if (!activeOrderTime) return "";
+
+  let timeStr = String(activeOrderTime);
+  if (!timeStr.endsWith("Z")) {
+    timeStr += "Z";
+  }
+
+  const startTime = new Date(timeStr);
+  const diffMs = currentTime.value.getTime() - startTime.getTime();
+
+  if (diffMs <= 0) return "Vừa vào";
+
+  const diffMins = Math.floor(diffMs / 60000);
+  const hours = Math.floor(diffMins / 60);
+  const mins = diffMins % 60;
+
+  if (hours > 0) return `${hours}g ${mins}p`;
+  return `${mins} phút`;
+};
+// ---------------------
 
 const uniqueAreas = computed(() => {
-  const areas = tables.value.map(t => t.areaName);
+  const areas = tables.value.map((t) => t.areaName);
   return [...new Set(areas)].sort();
 });
 
 const filteredGroupedTables = computed(() => {
   const groups: Record<string, TableStatusDto[]> = {};
-  
-  tables.value.forEach(t => {
-    if (selectedArea.value === 'All' || selectedArea.value === t.areaName) {
-      const area = t.areaName || 'Khác';
+
+  tables.value.forEach((t) => {
+    if (selectedArea.value === "All" || selectedArea.value === t.areaName) {
+      const area = t.areaName || "Khác";
       if (!groups[area]) {
         groups[area] = [];
       }
       groups[area]!.push(t);
     }
   });
-  
+
   return groups;
 });
 
@@ -138,50 +240,114 @@ const fetchTables = async () => {
     tables.value = response;
   } catch (error) {
     console.error(error);
-    toast.error('Lỗi khi tải danh sách bàn. Vui lòng thử lại!');
+    toast.error("Lỗi khi tải danh sách bàn. Vui lòng thử lại!");
   } finally {
     loading.value = false;
   }
 };
 
 const onSelect = (table: TableStatusDto) => {
-  emit('select-table', table);
+  emit("select-table", table);
 };
 
 const selectTakeaway = () => {
-  emit('select-takeaway'); 
+  emit("select-takeaway");
 };
 
 onMounted(() => {
   fetchTables();
+  // Khởi động đồng hồ
+  timerInterval = setInterval(() => {
+    currentTime.value = new Date();
+  }, 30000);
 });
 
-defineExpose({ fetchTables, tables });
+onUnmounted(() => {
+  if (timerInterval) clearInterval(timerInterval);
+});
+
+defineExpose({fetchTables, tables});
 </script>
 
 <style scoped>
-.cursor-pointer { cursor: pointer; }
-.transition-all { transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1); }
-.select-none { user-select: none; }
-.letter-spacing-1 { letter-spacing: 0.5px; }
+.cursor-pointer {
+  cursor: pointer;
+}
+.transition-all {
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.select-none {
+  user-select: none;
+}
+.letter-spacing-1 {
+  letter-spacing: 0.5px;
+}
 
-.table-card { background-color: #ffffff; overflow: hidden; }
+/* --- THIẾT KẾ THẺ BÀN SOFT UI --- */
+.table-card {
+  background-color: #ffffff;
+  min-height: 100px; /* Nhỏ gọn lại */
+}
 
-.table-card-success { border-color: rgba(25, 135, 84, 0.3) !important; }
-.table-card-success:hover { background-color: #f2fdf6; border-color: #198754 !important; transform: translateY(-3px); }
+/* 1. Trống */
+.card-empty {
+  border-color: #bbf7d0 !important;
+  background-color: #f0fdf4;
+}
+.card-empty:hover {
+  background-color: #dcfce7;
+  transform: translateY(-2px);
+}
 
-.table-card-danger { border-color: rgba(220, 53, 69, 0.3) !important; background-color: #fffafb; }
-.table-card-danger:hover { background-color: #fff0f2; border-color: #dc3545 !important; transform: translateY(-3px); }
+/* 2. Có khách */
+.card-occupied {
+  border-color: #fecaca !important;
+  background-color: #fef2f2;
+}
+.card-occupied:hover {
+  background-color: #fee2e2;
+  transform: translateY(-2px);
+}
 
-.takeaway-card { overflow: hidden; border: 1px solid transparent; }
-.takeaway-card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important; }
+/* --- HIỆU ỨNG KHI ĐƯỢC CHỌN (SÁNG LÊN) --- */
+.selected-table {
+  box-shadow: 0 0 0 3px #3b82f6, 0 8px 16px rgba(59, 130, 246, 0.2) !important;
+  border-color: transparent !important;
+  background-color: #eff6ff !important; /* Đổi nền xanh nhạt khi chọn */
+}
 
-.ring-3 { box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.5) !important; }
-.ring-warning { box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.6) !important; }
-.transform-active { transform: translateY(-3px) scale(1.02); }
+.selected-takeaway .card-body {
+  box-shadow: 0 0 0 3px #f59e0b, 0 8px 16px rgba(245, 158, 11, 0.2) !important;
+  background-color: #fffbeb !important; /* Đổi nền vàng nhạt khi chọn Takeaway */
+}
 
-.custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); border-radius: 10px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.3); }
+.transform-active {
+  transform: translateY(-4px) scale(1.02);
+  z-index: 10;
+}
+
+/* Takeaway chung */
+.takeaway-card .card-body {
+  transition: all 0.2s;
+}
+.takeaway-card:hover .card-body {
+  background-color: #fffbeb !important;
+  transform: translateY(-2px);
+}
+
+/* Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
 </style>
