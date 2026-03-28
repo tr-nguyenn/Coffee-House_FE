@@ -1,0 +1,33 @@
+/* SweetAlert2 Light Theme Overrides */
+.swal-light-popup {
+  border-radius: 16px !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12) !important;
+  padding: 28px 24px !important;
+}
+
+.swal-light-title {
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  color: #1f2937 !important;
+}
+
+.swal-light-popup .swal2-html-container {
+  color: #6b7280 !important;
+  font-size: 0.9rem !important;
+}
+
+.swal-btn-confirm {
+  border-radius: 10px !important;
+  padding: 10px 26px !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+}
+
+.swal-btn-cancel {
+  border-radius: 10px !important;
+  padding: 10px 22px !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  color: #374151 !important;
+}
