@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex flex-column h-100 bg-white ms-3 border-start">
+  <div class="d-flex flex-column h-100 bg-white ms-3 border-start no-print">
     <div
       class="p-2 border-bottom bg-light flex-shrink-0 z-1 d-flex justify-content-center"
     >
@@ -13,14 +13,12 @@
         >
           <i class="bi bi-journal-text me-1"></i> Thực đơn
         </button>
-
         <button
           class="custom-tab-btn rounded-pill fw-semibold transition-all position-relative"
           :class="{active: activeTab === 'cart'}"
           @click="activeTab = 'cart'"
         >
           <i class="bi bi-receipt me-1"></i> Hóa đơn
-
           <span
             v-if="cart.length > 0"
             class="position-absolute badge rounded-pill bg-danger border border-white"
@@ -61,14 +59,18 @@
           @send-to-kitchen="handleSendToKitchen"
           @checkout="handleCheckout"
           @open-table="handleOpenTable"
+          @print-provisional="handlePrintProvisional"
         />
       </div>
     </div>
   </div>
+
+  <PrintBill :order="orderToPrint" />
 </template>
 
 <script setup lang="ts">
-import {ref, watch} from "vue";
+import {ref, watch, nextTick} from "vue";
+import PrintBill from "../shared/PrintBill.vue";
 import PosMenu from "./PosMenu.vue";
 import PosCart from "./PosCart.vue";
 import {toast} from "@/utils/toast";
@@ -89,6 +91,7 @@ const activeTab = ref<"menu" | "cart">("menu");
 const cart = ref<OrderDetailDto[]>([]);
 const existingOrder = ref<any>(null);
 const selectedTableIdRef = ref<string | null>(null);
+const orderToPrint = ref<any>(null);
 
 watch(
   () => props.selectedTable,
@@ -97,9 +100,7 @@ watch(
       cart.value = [];
       selectedTableIdRef.value = newTable?.tableId || null;
     }
-
     existingOrder.value = null;
-
     if (
       newTable &&
       newTable.isInUse &&
@@ -120,9 +121,8 @@ watch(
 
 const handleAddToCart = (product: any) => {
   const existing = cart.value.find((c) => c.productId === product.id);
-  if (existing) {
-    existing.quantity++;
-  } else {
+  if (existing) existing.quantity++;
+  else
     cart.value.push({
       productId: product.id,
       name: product.name,
@@ -130,7 +130,6 @@ const handleAddToCart = (product: any) => {
       unitPrice: product.price,
       note: "",
     });
-  }
   toast.success(`Đã thêm ${product.name}`);
 };
 
@@ -139,12 +138,9 @@ const handleRemoveItem = (item: OrderDetailDto) => {
 };
 
 const handleSendToKitchen = async (payload?: any) => {
-  if (!props.selectedTable) {
-    toast.error("Vui lòng chọn bàn hoặc Khách mang đi!");
-    return;
-  }
+  if (!props.selectedTable)
+    return toast.error("Vui lòng chọn bàn hoặc Khách mang đi!");
   if (cart.value.length === 0) return;
-
   const itemsDto = cart.value.map((c) => ({
     productId: c.productId,
     quantity: c.quantity,
@@ -164,16 +160,13 @@ const handleSendToKitchen = async (payload?: any) => {
       });
       toast.success("Thanh toán mang đi thành công! Đã báo bếp.");
     } else {
-      if (!props.selectedTable.isInUse || !props.selectedTable.activeOrderId) {
-        toast.warning("Vui lòng mở bàn trước khi gọi món!");
-        return;
-      }
+      if (!props.selectedTable.isInUse || !props.selectedTable.activeOrderId)
+        return toast.warning("Vui lòng mở bàn trước khi gọi món!");
       await orderService.addItemsToOrder(props.selectedTable.activeOrderId, {
         newItems: itemsDto,
       });
       toast.success("Đã báo bếp món thêm!");
     }
-
     cart.value = [];
     emit("order-success", "update");
   } catch (err: any) {
@@ -188,25 +181,64 @@ const handleOpenTable = async () => {
     toast.success("Mở bàn thành công!");
     emit("order-success", "create");
   } catch (err: any) {
-    const errorMsg =
-      err.response?.data?.message || err.message || "Lỗi mở bàn!";
-    toast.error(errorMsg);
+    toast.error(err.response?.data?.message || err.message || "Lỗi mở bàn!");
   }
 };
 
+const getPaymentMethodName = (method: string) => {
+  const map: Record<string, string> = {
+    Cash: "Tiền mặt",
+    Banking: "Chuyển khoản / QR",
+    Card: "Thẻ / Ví",
+  };
+  return map[method] || method || "Tiền mặt";
+};
+
+// 👉 CẬP NHẬT: THÊM nextTick CHO IN TẠM TÍNH
+const handlePrintProvisional = async () => {
+  if (!existingOrder.value) return;
+  orderToPrint.value = {...existingOrder.value, isProvisional: true};
+
+  await nextTick(); // Chờ VueJS cập nhật HTML
+
+  setTimeout(() => {
+    window.print();
+    orderToPrint.value = null;
+  }, 100);
+};
+
+// 👉 CẬP NHẬT: THÊM nextTick CHO IN THANH TOÁN
 const handleCheckout = async (payload?: any) => {
   if (!existingOrder.value) return;
+  const paymentMethod = payload?.paymentMethod || "Cash";
 
-  if (confirm("Xác nhận thanh toán và đóng bàn này?")) {
+  if (
+    confirm(
+      `Xác nhận thanh toán hóa đơn này bằng ${getPaymentMethodName(
+        paymentMethod
+      )}?`
+    )
+  ) {
     try {
       await orderService.checkoutOrder(existingOrder.value.id, {
-        paymentMethod: payload?.paymentMethod || "Cash",
+        paymentMethod: paymentMethod,
         customerId: payload?.customerId || null,
-        customerName: payload?.customerName || null,
-        customerPhone: payload?.customerPhone || null,
       });
       toast.success("Thanh toán thành công!");
-      emit("order-success", "checkout");
+
+      orderToPrint.value = {
+        ...existingOrder.value,
+        paymentMethod: paymentMethod,
+        isProvisional: false,
+      };
+
+      await nextTick(); // Chờ VueJS vẽ HTML
+
+      setTimeout(() => {
+        window.print();
+        emit("order-success", "checkout");
+        orderToPrint.value = null;
+      }, 100);
     } catch (err) {
       toast.error("Lỗi thanh toán!");
     }
@@ -215,58 +247,98 @@ const handleCheckout = async (payload?: any) => {
 </script>
 
 <style scoped>
-/* --- THIẾT KẾ TAB CHUYỂN ĐỔI (SEGMENTED CONTROL) --- */
 .custom-tab-container {
   display: inline-flex;
-  background-color: #f8fafc; /* Nền xám rất nhạt */
+  background-color: #f8fafc;
   border: 1px solid #e2e8f0;
 }
-
 .custom-tab-btn {
   background: transparent;
   border: none;
-  color: #64748b; /* Xám nhạt khi không active */
+  color: #64748b;
   padding: 8px 32px;
   font-size: 0.9rem;
   letter-spacing: 0.3px;
-  min-width: 140px; /* Đảm bảo 2 nút to bằng nhau */
+  min-width: 140px;
   margin: 0 4px;
 }
-
 .custom-tab-btn:hover {
   color: #334155;
 }
-
 .custom-tab-btn.active {
-  background-color: #ffffff; /* Nổi trắng lên khi chọn */
+  background-color: #ffffff;
   color: #0f172a;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Đổ bóng nhẹ tạo độ sâu */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
-
 .transition-all {
   transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
-
-/* Xử lý layout cho nội dung Tab */
 .tab-pane {
   display: flex;
   flex-direction: column;
 }
-
 .tab-content {
   position: relative;
   background-color: #ffffff;
 }
-
-/* Ẩn các tab không active nhưng vẫn giữ trong DOM để không mất giỏ hàng */
 .tab-pane:not(.active) {
   opacity: 0;
   pointer-events: none;
 }
-
 .tab-pane.active {
   opacity: 1;
   pointer-events: auto;
   transition: opacity 0.3s ease;
+}
+
+/* Ẩn khu vực in khi đang dùng bình thường */
+.print-only {
+  display: none;
+}
+</style>
+
+<style>
+@media print {
+  /* Ẩn TOÀN BỘ layout web */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Bật hiển thị khu vực in */
+  #print-bill-area,
+  #print-bill-area * {
+    visibility: visible;
+  }
+
+  /* Ép khung Hóa đơn lên góc cùng màn hình (thoát khỏi rào cản của thẻ cha) */
+  #print-bill-area {
+    display: block !important;
+    position: fixed !important;
+    left: 0;
+    top: 0;
+    width: 80mm !important; /* Size chuẩn máy in nhiệt K80 */
+    margin: 0;
+    padding: 0;
+    color: #000 !important;
+    background: #fff !important;
+    font-family: "Courier New", Courier, monospace;
+    z-index: 99999;
+  }
+
+  .dashed-border {
+    border-style: dashed !important;
+  }
+
+  /* Gỡ bỏ các giới hạn chiều cao chống tràn để máy in không cắt giấy */
+  html,
+  body,
+  #app,
+  .admin-layout,
+  .main-wrapper,
+  .pos-layout {
+    height: auto !important;
+    overflow: visible !important;
+    background-color: white !important;
+  }
 }
 </style>

@@ -260,7 +260,7 @@
               <select
                 class="form-select form-select-sm bg-light fw-semibold"
                 v-model="selectedPaymentMethod"
-                style="width: 40%"
+                style="width: 35%"
               >
                 <option value="Cash">Tiền mặt</option>
                 <option value="Banking">Chuyển khoản</option>
@@ -275,13 +275,21 @@
                 <i class="bi bi-bell-fill"></i> BÁO BẾP
               </button>
 
-              <button
-                v-if="existingOrder && cart.length === 0"
-                class="btn btn-success btn-sm flex-grow-1 fw-bold shadow-sm"
-                @click="emit('checkout', getCheckoutPayload())"
-              >
-                THANH TOÁN
-              </button>
+              <template v-if="existingOrder && cart.length === 0">
+                <button
+                  class="btn btn-info btn-sm text-white fw-bold shadow-sm px-3"
+                  @click="emit('print-provisional')"
+                  title="In Tạm Tính"
+                >
+                  <i class="bi bi-printer-fill"></i>
+                </button>
+                <button
+                  class="btn btn-success btn-sm flex-grow-1 fw-bold shadow-sm"
+                  @click="emit('checkout', getCheckoutPayload())"
+                >
+                  THANH TOÁN
+                </button>
+              </template>
             </div>
           </template>
         </template>
@@ -291,7 +299,7 @@
             <select
               class="form-select form-select-sm bg-light fw-semibold"
               v-model="selectedPaymentMethod"
-              style="width: 40%"
+              style="width: 35%"
             >
               <option value="Cash">Tiền mặt</option>
               <option value="Banking">Chuyển khoản</option>
@@ -328,6 +336,7 @@ const emit = defineEmits([
   "checkout",
   "open-table",
   "change-table",
+  "print-provisional",
 ]);
 
 const existingItems = computed(() => props.existingOrder?.orderDetails || []);

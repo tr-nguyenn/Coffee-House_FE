@@ -5,14 +5,50 @@
         <thead>
           <tr>
             <th class="stt-col">STT</th>
-            <th class="text-center fw-bold" v-for="col in columns" :key="col.key" :style="{width: col.width}">
-              {{ col.label }}
+
+            <th
+              class="text-center fw-bold transition-all"
+              v-for="col in columns"
+              :key="col.key"
+              :style="{width: col.width}"
+              :class="{
+                'cursor-pointer select-none table-header-hover': col.sortable,
+              }"
+              @click="col.sortable ? handleSort(col.key) : null"
+            >
+              <div
+                class="d-flex align-items-center justify-content-center gap-1"
+              >
+                <span>{{ col.label }}</span>
+
+                <span
+                  v-if="col.sortable"
+                  class="d-inline-flex flex-column align-items-center ms-1 sort-icons"
+                >
+                  <i
+                    class="bi bi-caret-up-fill"
+                    :class="
+                      sortBy === col.key && !isDesc
+                        ? 'text-primary'
+                        : 'text-muted opacity-25'
+                    "
+                  ></i>
+                  <i
+                    class="bi bi-caret-down-fill"
+                    :class="
+                      sortBy === col.key && isDesc
+                        ? 'text-primary'
+                        : 'text-muted opacity-25'
+                    "
+                  ></i>
+                </span>
+              </div>
             </th>
+
             <th class="action-col">Thao tác</th>
           </tr>
         </thead>
         <tbody>
-          <!-- Empty State -->
           <tr v-if="items.length === 0">
             <td :colspan="columns.length + 2" class="empty-cell">
               <div class="empty-state">
@@ -22,7 +58,7 @@
               </div>
             </td>
           </tr>
-          <!-- Rows -->
+
           <tr
             v-for="(item, index) in items"
             :key="item.id"
@@ -30,7 +66,9 @@
             class="data-row"
           >
             <td class="stt-col">
-              <span class="stt-badge">{{ index + 1 + (currentPage - 1) * pageSize }}</span>
+              <span class="stt-badge">{{
+                index + 1 + (currentPage - 1) * pageSize
+              }}</span>
             </td>
             <td v-for="col in columns" :key="col.key">
               <slot :name="'col-' + col.key" :item="item">
@@ -39,10 +77,18 @@
             </td>
             <td class="action-col">
               <div class="action-buttons">
-                <button class="btn-action edit-btn" @click.stop="$emit('edit', item)" title="Chỉnh sửa">
+                <button
+                  class="btn-action edit-btn"
+                  @click.stop="$emit('edit', item)"
+                  title="Chỉnh sửa"
+                >
                   <i class="bi bi-pencil-square"></i>
                 </button>
-                <button class="btn-action delete-btn" @click.stop="$emit('delete', item.id)" title="Xóa">
+                <button
+                  class="btn-action delete-btn"
+                  @click.stop="$emit('delete', item.id)"
+                  title="Xóa"
+                >
                   <i class="bi bi-trash3"></i>
                 </button>
               </div>
@@ -55,14 +101,35 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  columns: Array<{label: string; key: string; width?: string}>;
+import {ref} from "vue";
+
+const props = defineProps<{
+  columns: Array<{
+    label: string;
+    key: string;
+    width?: string;
+    sortable?: boolean;
+  }>;
   items: any[];
   currentPage: number;
   pageSize: number;
 }>();
 
-defineEmits(["edit", "delete", "row-click"]);
+const emit = defineEmits(["edit", "delete", "row-click", "sort"]);
+
+const sortBy = ref("");
+const isDesc = ref(false);
+
+const handleSort = (key: string) => {
+  if (sortBy.value === key) {
+    isDesc.value = !isDesc.value;
+  } else {
+    sortBy.value = key;
+    isDesc.value = false;
+  }
+
+  emit("sort", {sortBy: sortBy.value, isDesc: isDesc.value});
+};
 </script>
 
 <style scoped>
@@ -92,6 +159,26 @@ defineEmits(["edit", "delete", "row-click"]);
   white-space: nowrap;
 }
 
+.table-header-hover:hover {
+  background-color: #f1f5f9 !important;
+  color: #111827;
+}
+
+.sort-icons {
+  font-size: 0.55rem;
+  line-height: 0.6;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+.select-none {
+  user-select: none;
+}
+.transition-all {
+  transition: all 0.2s ease;
+}
+
 .custom-table tbody td {
   padding: 14px 20px;
   border-bottom: 1px solid #f3f4f6;
@@ -113,7 +200,6 @@ defineEmits(["edit", "delete", "row-click"]);
   background-color: #f9fafb;
 }
 
-/* STT */
 .stt-col {
   width: 60px;
   text-align: center;
@@ -178,7 +264,6 @@ defineEmits(["edit", "delete", "row-click"]);
   color: #2563eb;
   transform: translateY(-1px);
 }
-
 .delete-btn {
   color: #ef4444;
 }
@@ -188,7 +273,6 @@ defineEmits(["edit", "delete", "row-click"]);
   transform: translateY(-1px);
 }
 
-/* Empty State */
 .empty-cell {
   padding: 60px 20px !important;
   background-color: #fafafa;

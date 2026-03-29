@@ -35,7 +35,7 @@ const currentPageTitle = computed(() => {
     "admin-areas": "Quản lý khu vực",
     "admin-users": "Danh sách khách hàng",
     "admin-staffs": "Quản lý nhân viên",
-    "admin-kitchen": "Màn hình bếp"
+    "admin-kitchen": "Màn hình bếp",
   };
   return titles[route.name as string] || "Dashboard";
 });

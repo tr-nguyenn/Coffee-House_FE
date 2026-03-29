@@ -1,6 +1,11 @@
 <template>
   <div class="admin-content-inner">
-    <BaseToolbar placeholder="Tìm tên loại sản phẩm..." btnLabel="Thêm loại mới" @search="onSearch" @add="openModal" />
+    <BaseToolbar
+      placeholder="Tìm tên loại sản phẩm..."
+      btnLabel="Thêm loại mới"
+      @search="onSearch"
+      @add="openModal"
+    />
 
     <BaseTable
       :columns="categoryCols"
@@ -58,8 +63,12 @@ const paging = reactive<PagingInfo>({
   hasNextPage: false,
 });
 
-const pagingFrom = computed(() => (paging.totalCount === 0 ? 0 : (paging.pageNumber - 1) * paging.pageSize + 1));
-const pagingTo = computed(() => Math.min(paging.pageNumber * paging.pageSize, paging.totalCount));
+const pagingFrom = computed(() =>
+  paging.totalCount === 0 ? 0 : (paging.pageNumber - 1) * paging.pageSize + 1
+);
+const pagingTo = computed(() =>
+  Math.min(paging.pageNumber * paging.pageSize, paging.totalCount)
+);
 
 const fetchData = async (page = 1) => {
   loading.value = true;
@@ -95,7 +104,10 @@ const openModal = (item?: Category) => {
 };
 
 const handleDelete = async (id: string) => {
-  const result = await confirmDelete("Xóa loại sản phẩm?", "Tất cả sản phẩm thuộc loại này cũng sẽ bị ảnh hưởng!");
+  const result = await confirmDelete(
+    "Xóa loại sản phẩm?",
+    "Tất cả sản phẩm thuộc loại này cũng sẽ bị ảnh hưởng!"
+  );
   if (result.isConfirmed) {
     try {
       await categoryService.delete(id);
