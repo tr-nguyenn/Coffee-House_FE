@@ -2,27 +2,16 @@
   <div class="d-flex flex-column h-100 bg-white">
     <div class="p-2 border-bottom bg-light flex-shrink-0 shadow-sm z-1">
       <div class="d-flex justify-content-between align-items-center mb-2">
-        <span class="fs-5 fw-bold text-dark"
-          ><i class="bi bi-grid-fill mx-2 text-primary"></i>Sơ đồ bàn</span
-        >
-        <button
-          class="btn btn-sm btn-outline-secondary rounded-circle"
-          title="Làm mới"
-          @click="fetchTables"
-        >
+        <span class="fs-5 fw-bold text-dark"><i class="bi bi-grid-fill mx-2 text-primary"></i>Sơ đồ bàn</span>
+        <button class="btn btn-sm btn-outline-secondary rounded-circle" title="Làm mới" @click="fetchTables">
           <i class="bi bi-arrow-clockwise"></i>
         </button>
       </div>
 
-      <div
-        class="d-flex overflow-auto custom-scrollbar pb-1 gap-2"
-        style="white-space: nowrap"
-      >
+      <div class="d-flex overflow-auto custom-scrollbar pb-3 gap-2" style="white-space: nowrap">
         <button
           class="btn btn-sm rounded-pill fw-bold transition-all"
-          :class="
-            selectedArea === 'All' ? 'btn-primary' : 'btn-outline-secondary'
-          "
+          :class="selectedArea === 'All' ? 'btn-primary' : 'btn-outline-secondary'"
           @click="selectedArea = 'All'"
         >
           Tất cả
@@ -31,9 +20,7 @@
           v-for="area in uniqueAreas"
           :key="area"
           class="btn btn-sm rounded-pill fw-bold transition-all"
-          :class="
-            selectedArea === area ? 'btn-primary' : 'btn-outline-secondary'
-          "
+          :class="selectedArea === area ? 'btn-primary' : 'btn-outline-secondary'"
           @click="selectedArea = area"
         >
           {{ area }}
@@ -43,14 +30,13 @@
 
     <div
       class="flex-grow-1 overflow-auto p-3 custom-scrollbar"
-      style="background-color: #f8fafc"
+      style="background-color: #f8fafc; min-height: 0; height: 0px"
     >
       <div class="mb-4">
         <div
           class="card text-center cursor-pointer transition-all border-0 rounded-4 shadow-sm takeaway-card"
           :class="{
-            'selected-takeaway transform-active':
-              selectedTableId === 'TAKEAWAY',
+            'selected-takeaway transform-active': selectedTableId === 'TAKEAWAY',
           }"
           @click="selectTakeaway"
         >
@@ -64,9 +50,7 @@
               <i class="bi bi-bag-check-fill fs-4"></i>
             </div>
             <div class="text-start flex-grow-1">
-              <h6 class="fw-bolder text-dark mb-0 letter-spacing-1">
-                Khách mua mang đi
-              </h6>
+              <h6 class="fw-bolder text-dark mb-0 letter-spacing-1">Khách mua mang đi</h6>
               <small class="text-secondary fw-semibold">Không cần bàn</small>
             </div>
             <i class="bi bi-chevron-right text-warning fs-5"></i>
@@ -74,30 +58,18 @@
         </div>
       </div>
 
-      <div
-        v-if="loading"
-        class="d-flex justify-content-center align-items-center py-5"
-      >
+      <div v-if="loading" class="d-flex justify-content-center align-items-center py-5">
         <div class="spinner-border text-primary" role="status"></div>
       </div>
 
       <div v-else>
-        <div
-          v-for="(group, areaName) in filteredGroupedTables"
-          :key="areaName"
-          class="mb-5"
-        >
+        <div v-for="(group, areaName) in filteredGroupedTables" :key="areaName" class="mb-5">
           <div class="d-flex align-items-center mb-3 ps-1">
-            <div
-              class="bg-primary rounded-pill me-2"
-              style="width: 5px; height: 20px"
-            ></div>
-            <h6 class="fw-bolder text-dark  mb-0">
+            <div class="bg-primary rounded-pill me-2" style="width: 5px; height: 20px"></div>
+            <h6 class="fw-bolder text-dark mb-0">
               {{ areaName }}
             </h6>
-            <span class="badge bg-white text-secondary ms-2 border shadow-sm"
-              >{{ group.length }} bàn</span
-            >
+            <span class="badge bg-white text-secondary ms-2 border shadow-sm">{{ group.length }} bàn</span>
           </div>
 
           <div class="row row-cols-3 row-cols-sm-4 row-cols-md-5 g-2">
@@ -106,26 +78,18 @@
                 class="card h-100 text-center cursor-pointer transition-all border-2 rounded-4 select-none table-card position-relative overflow-hidden"
                 :class="[
                   table.isInUse ? 'card-occupied' : 'card-empty',
-                  selectedTableId === table.tableId
-                    ? 'selected-table transform-active'
-                    : 'shadow-sm',
+                  selectedTableId === table.tableId ? 'selected-table transform-active' : 'shadow-sm',
                 ]"
                 @click="onSelect(table)"
               >
                 <div class="position-absolute top-0 end-0 mt-2 me-2">
                   <i
                     class="bi fs-6"
-                    :class="
-                      table.isInUse
-                        ? 'bi-cup-hot-fill text-danger'
-                        : 'bi-check2-circle text-success'
-                    "
+                    :class="table.isInUse ? 'bi-cup-hot-fill text-danger' : 'bi-check2-circle text-success'"
                   ></i>
                 </div>
 
-                <div
-                  class="card-body p-2 d-flex flex-column justify-content-center align-items-center"
-                >
+                <div class="card-body p-2 d-flex flex-column justify-content-center align-items-center">
                   <h5
                     class="fw-bolder mt-3 mb-1"
                     :class="table.isInUse ? 'text-danger' : 'text-success'"
@@ -158,10 +122,7 @@
               </div>
             </div>
 
-            <div
-              v-if="group.length === 0"
-              class="col-12 py-2 text-muted fst-italic small"
-            >
+            <div v-if="group.length === 0" class="col-12 py-2 text-muted fst-italic small">
               Không có bàn ở khu vực này.
             </div>
           </div>
@@ -311,13 +272,17 @@ defineExpose({fetchTables, tables});
 }
 
 .selected-table {
-  box-shadow: 0 0 0 3px #3b82f6, 0 8px 16px rgba(59, 130, 246, 0.2) !important;
+  box-shadow:
+    0 0 0 3px #3b82f6,
+    0 8px 16px rgba(59, 130, 246, 0.2) !important;
   border-color: transparent !important;
   background-color: #eff6ff !important;
 }
 
 .selected-takeaway .card-body {
-  box-shadow: 0 0 0 3px #f59e0b, 0 8px 16px rgba(245, 158, 11, 0.2) !important;
+  box-shadow:
+    0 0 0 3px #f59e0b,
+    0 8px 16px rgba(245, 158, 11, 0.2) !important;
   background-color: #fffbeb !important;
 }
 

@@ -1,27 +1,44 @@
 <template>
   <header class="admin-header px-4 px-md-3 d-flex align-items-center justify-content-between shadow-sm">
     <div class="header-left d-flex align-items-center gap-4 h-100">
-      <router-link :to="userRole === 'Bếp' ? '/admin/kitchen' : '/admin/dashboard'" class="sidebar-brand text-decoration-none d-flex align-items-center mb-0 pb-0">
-        <AppLogo size="26" />
+      <router-link
+        :to="userRole === 'Bếp' ? '/admin/kitchen' : '/admin/dashboard'"
+        class="sidebar-brand text-decoration-none d-flex align-items-center mb-0 pb-0"
+      >
+        <AppLogo size="25" />
       </router-link>
 
-      <nav v-if="userRole !== 'Bếp'" class="top-nav d-none d-lg-flex align-items-center h-100 gap-1 ms-2 small">
-        <div class="nav-item position-relative h-100 d-flex align-items-center" :class="{ 'active': isOperationActive }">
-          <router-link to="/admin/pos" class="nav-link cursor-pointer d-flex align-items-center gap-2 text-warning">
+      <nav
+        v-if="userRole !== 'Bếp'"
+        class="top-nav d-none d-lg-flex align-items-center h-100 gap-1 ms-2 small"
+      >
+        <div
+          class="nav-item position-relative h-100 d-flex align-items-center"
+          :class="{active: isOperationActive}"
+        >
+          <router-link
+            to="/admin/pos"
+            class="nav-link cursor-pointer d-flex align-items-center gap-2 text-warning"
+          >
             <i class="bi bi-shop fs-5"></i>
-            <span class="fw-bold nav-text  letter-spacing-1">Bán hàng</span>
+            <span class="fw-bold nav-text letter-spacing-1">Bán hàng</span>
           </router-link>
         </div>
 
-        <div class="nav-item position-relative h-100 d-flex align-items-center"
-             @mouseenter="openDropdown = 'menu'"
-             @mouseleave="openDropdown = null">
-          <div class="nav-link cursor-pointer d-flex align-items-center gap-2" :class="{ 'active': isMenuActive }">
+        <div
+          class="nav-item position-relative h-100 d-flex align-items-center"
+          @mouseenter="openDropdown = 'menu'"
+          @mouseleave="openDropdown = null"
+        >
+          <div
+            class="nav-link cursor-pointer d-flex align-items-center gap-2"
+            :class="{active: isMenuActive}"
+          >
             <i class="bi bi-cup-hot fs-6"></i>
             <span class="fw-bold nav-text">Thực đơn</span>
             <i class="bi bi-chevron-down small text-secondary"></i>
           </div>
-          
+
           <transition name="dropdown-fade">
             <div class="dropdown-menu shadow-lg" v-show="openDropdown === 'menu'">
               <router-link to="/admin/categories" class="dropdown-item" @click="openDropdown = null">
@@ -34,36 +51,51 @@
           </transition>
         </div>
 
-        <div class="nav-item position-relative h-100 d-flex align-items-center"
-             @mouseenter="openDropdown = 'account'"
-             @mouseleave="openDropdown = null">
-          <div class="nav-link cursor-pointer d-flex align-items-center gap-2" :class="{ 'active': isAccountActive }">
+        <div
+          class="nav-item position-relative h-100 d-flex align-items-center"
+          @mouseenter="openDropdown = 'account'"
+          @mouseleave="openDropdown = null"
+        >
+          <div
+            class="nav-link cursor-pointer d-flex align-items-center gap-2"
+            :class="{active: isAccountActive}"
+          >
             <i class="bi bi-people fs-6"></i>
             <span class="fw-bold nav-text">Tài khoản</span>
             <i class="bi bi-chevron-down small text-secondary"></i>
           </div>
-          
+
           <transition name="dropdown-fade">
             <div class="dropdown-menu shadow-lg" v-show="openDropdown === 'account'">
               <router-link to="/admin/users" class="dropdown-item" @click="openDropdown = null">
                 <i class="bi bi-person-heart text-primary"></i> Khách hàng
               </router-link>
-              <router-link v-if="userRole !== 'Nhân viên'" to="/admin/staffs" class="dropdown-item" @click="openDropdown = null">
+              <router-link
+                v-if="userRole !== 'Nhân viên'"
+                to="/admin/staffs"
+                class="dropdown-item"
+                @click="openDropdown = null"
+              >
                 <i class="bi bi-person-badge text-primary"></i> Nhân viên
               </router-link>
             </div>
           </transition>
         </div>
 
-        <div class="nav-item position-relative h-100 d-flex align-items-center"
-             @mouseenter="openDropdown = 'system'"
-             @mouseleave="openDropdown = null">
-          <div class="nav-link cursor-pointer d-flex align-items-center gap-2" :class="{ 'active': isSystemActive }">
+        <div
+          class="nav-item position-relative h-100 d-flex align-items-center"
+          @mouseenter="openDropdown = 'system'"
+          @mouseleave="openDropdown = null"
+        >
+          <div
+            class="nav-link cursor-pointer d-flex align-items-center gap-2"
+            :class="{active: isSystemActive}"
+          >
             <i class="bi bi-gear fs-6"></i>
             <span class="fw-bold nav-text">Hệ thống</span>
             <i class="bi bi-chevron-down small text-secondary"></i>
           </div>
-          
+
           <transition name="dropdown-fade">
             <div class="dropdown-menu shadow-lg" v-show="openDropdown === 'system'">
               <router-link to="/admin/areas" class="dropdown-item" @click="openDropdown = null">
@@ -82,16 +114,21 @@
           </transition>
         </div>
 
-           <div class="nav-item position-relative h-100 d-flex align-items-center"
-             v-if="userRole !== 'Nhân viên'"
-             @mouseenter="openDropdown = 'operation'"
-             @mouseleave="openDropdown = null">
-             <div class="nav-link cursor-pointer d-flex align-items-center gap-2" :class="{ 'active': isOperationActive }">
-               <i class="bi-graph-up-arrow fs-6"></i>
-               <span class="fw-bold nav-text">Thống kê</span>
-               <i class="bi bi-chevron-down small text-secondary"></i>
-              </div>
-              
+        <div
+          class="nav-item position-relative h-100 d-flex align-items-center"
+          v-if="userRole !== 'Nhân viên'"
+          @mouseenter="openDropdown = 'operation'"
+          @mouseleave="openDropdown = null"
+        >
+          <div
+            class="nav-link cursor-pointer d-flex align-items-center gap-2"
+            :class="{active: isDashboardActive}"
+          >
+            <i class="bi-graph-up-arrow fs-6"></i>
+            <span class="fw-bold nav-text">Thống kê</span>
+            <i class="bi bi-chevron-down small text-secondary"></i>
+          </div>
+
           <transition name="dropdown-fade">
             <div class="dropdown-menu shadow-lg" v-show="openDropdown === 'operation'">
               <router-link to="/admin/dashboard" class="dropdown-item" @click="openDropdown = null">
@@ -103,15 +140,20 @@
       </nav>
     </div>
 
-    <button v-if="userRole !== 'Bếp'" class="btn btn-icon d-lg-none rounded-circle d-flex align-items-center justify-content-center" @click="showMobileMenu = !showMobileMenu">
+    <button
+      v-if="userRole !== 'Bếp'"
+      class="btn btn-icon d-lg-none rounded-circle d-flex align-items-center justify-content-center"
+      @click="showMobileMenu = !showMobileMenu"
+    >
       <i class="bi bi-list fs-4"></i>
     </button>
 
     <div class="header-right d-flex align-items-center gap-3 h-100">
-      <div class="user-menu position-relative h-100 d-flex align-items-center" 
-           @mouseenter="openDropdown = 'user'"
-           @mouseleave="openDropdown = null">
-        
+      <div
+        class="user-menu position-relative h-100 d-flex align-items-center"
+        @mouseenter="openDropdown = 'user'"
+        @mouseleave="openDropdown = null"
+      >
         <div class="d-flex align-items-center gap-3 cursor-pointer">
           <div class="user-info text-end d-none d-md-block">
             <p class="mb-0 fw-bold user-name">{{ userName }}</p>
@@ -119,17 +161,26 @@
           </div>
           <div class="avatar shadow-sm position-relative">
             <span>{{ userInitial }}</span>
-            <div class="active-dot position-absolute top-0 start-100 translate-middle p-1 bg-success border border-2 border-dark rounded-circle"></div>
+            <div
+              class="active-dot position-absolute top-0 start-100 translate-middle p-1 bg-success border border-2 border-dark rounded-circle"
+            ></div>
           </div>
         </div>
 
         <transition name="dropdown-fade">
-          <div class="dropdown-menu dropdown-menu-end shadow-lg" v-show="openDropdown === 'user'" style="right: 0; left: auto; top: 100%;">
+          <div
+            class="dropdown-menu dropdown-menu-end shadow-lg"
+            v-show="openDropdown === 'user'"
+            style="right: 0; left: auto; top: 100%"
+          >
             <router-link to="/" class="dropdown-item">
               <i class="bi bi-globe text-info"></i> Xem trang web
             </router-link>
             <div class="dropdown-divider my-1 border-secondary border-opacity-25"></div>
-            <button @click="$emit('logout')" class="dropdown-item text-danger border-0 bg-transparent w-100 text-start">
+            <button
+              @click="$emit('logout')"
+              class="dropdown-item text-danger border-0 bg-transparent w-100 text-start"
+            >
               <i class="bi bi-box-arrow-left"></i> Đăng xuất
             </button>
           </div>
@@ -137,39 +188,72 @@
       </div>
     </div>
   </header>
-  
+
   <transition name="dropdown-fade">
-    <div class="mobile-menu bg-dark px-3 py-3 d-lg-none shadow-lg" v-if="showMobileMenu && userRole !== 'Bếp'">
-      <router-link to="/admin/pos" class="mobile-item bg-warning text-dark fw-bold" @click="showMobileMenu = false">
+    <div
+      class="mobile-menu bg-dark px-3 py-3 d-lg-none shadow-lg"
+      v-if="showMobileMenu && userRole !== 'Bếp'"
+    >
+      <router-link
+        to="/admin/pos"
+        class="mobile-item bg-warning text-dark fw-bold"
+        @click="showMobileMenu = false"
+      >
         <i class="bi bi-shop"></i> Bán hàng (POS)
       </router-link>
 
       <div class="text-secondary small fw-bold text-uppercase mb-2 mt-3">⚡ Vận hành</div>
-      <router-link v-if="userRole !== 'Nhân viên'" to="/admin/dashboard" class="mobile-item" @click="showMobileMenu = false"><i class="bi bi-speedometer2"></i> Tổng quan</router-link>
-      <router-link to="/admin/orders" class="mobile-item" @click="showMobileMenu = false"><i class="bi bi-receipt"></i> Đơn hàng</router-link>
-      <router-link to="/admin/kitchen" class="mobile-item" @click="showMobileMenu = false"><i class="bi bi-display"></i> Màn hình bếp</router-link>
-      
+      <router-link
+        v-if="userRole !== 'Nhân viên'"
+        to="/admin/dashboard"
+        class="mobile-item"
+        @click="showMobileMenu = false"
+        ><i class="bi bi-speedometer2"></i> Tổng quan</router-link
+      >
+      <router-link to="/admin/orders" class="mobile-item" @click="showMobileMenu = false"
+        ><i class="bi bi-receipt"></i> Đơn hàng</router-link
+      >
+      <router-link to="/admin/kitchen" class="mobile-item" @click="showMobileMenu = false"
+        ><i class="bi bi-display"></i> Màn hình bếp</router-link
+      >
+
       <div class="text-secondary small fw-bold text-uppercase mb-2 mt-3">☕ Thực đơn</div>
-      <router-link to="/admin/categories" class="mobile-item" @click="showMobileMenu = false"><i class="bi bi-tags"></i> Danh mục</router-link>
-      <router-link to="/admin/products" class="mobile-item" @click="showMobileMenu = false"><i class="bi bi-box-seam"></i> Sản phẩm</router-link>
+      <router-link to="/admin/categories" class="mobile-item" @click="showMobileMenu = false"
+        ><i class="bi bi-tags"></i> Danh mục</router-link
+      >
+      <router-link to="/admin/products" class="mobile-item" @click="showMobileMenu = false"
+        ><i class="bi bi-box-seam"></i> Sản phẩm</router-link
+      >
 
       <div class="text-secondary small fw-bold text-uppercase mb-2 mt-3">👥 Tài khoản</div>
-      <router-link to="/admin/users" class="mobile-item" @click="showMobileMenu = false"><i class="bi bi-person-heart"></i> Khách hàng</router-link>
-      <router-link v-if="userRole !== 'Nhân viên'" to="/admin/staffs" class="mobile-item" @click="showMobileMenu = false"><i class="bi bi-person-badge"></i> Nhân viên</router-link>
+      <router-link to="/admin/users" class="mobile-item" @click="showMobileMenu = false"
+        ><i class="bi bi-person-heart"></i> Khách hàng</router-link
+      >
+      <router-link
+        v-if="userRole !== 'Nhân viên'"
+        to="/admin/staffs"
+        class="mobile-item"
+        @click="showMobileMenu = false"
+        ><i class="bi bi-person-badge"></i> Nhân viên</router-link
+      >
 
       <div class="text-secondary small fw-bold text-uppercase mb-2 mt-3">⚙️ Hệ thống</div>
-      <router-link to="/admin/areas" class="mobile-item" @click="showMobileMenu = false"><i class="bi bi-map"></i> Khu vực</router-link>
-      <router-link to="/admin/tables" class="mobile-item" @click="showMobileMenu = false"><i class="bi bi-table"></i> Bàn & Sơ đồ</router-link>
+      <router-link to="/admin/areas" class="mobile-item" @click="showMobileMenu = false"
+        ><i class="bi bi-map"></i> Khu vực</router-link
+      >
+      <router-link to="/admin/tables" class="mobile-item" @click="showMobileMenu = false"
+        ><i class="bi bi-table"></i> Bàn & Sơ đồ</router-link
+      >
     </div>
   </transition>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import {ref, computed, onMounted} from "vue";
+import {useRoute} from "vue-router";
 import AppLogo from "@/components/AppLogo.vue";
 
-defineProps<{ pageTitle: string }>();
+defineProps<{pageTitle: string}>();
 defineEmits(["logout"]);
 
 const route = useRoute();
@@ -190,20 +274,32 @@ onMounted(() => {
   if (token) {
     try {
       const base64Url = token.split(".")[1] as string;
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map(function (c) {
+            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+          })
+          .join(""),
+      );
       const payload = JSON.parse(jsonPayload);
-      
-      let role = payload["role"] || payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || "Nhân viên";
-      
-      if (role === 'Admin') userRole.value = 'Quản trị viên';
-      else if (role === 'Staff') userRole.value = 'Nhân viên';
-      else if (role === 'Kitchen') userRole.value = 'Bếp';
+
+      let role =
+        payload["role"] ||
+        payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
+        "Nhân viên";
+
+      if (role === "Admin") userRole.value = "Quản trị viên";
+      else if (role === "Staff") userRole.value = "Nhân viên";
+      else if (role === "Kitchen") userRole.value = "Bếp";
       else userRole.value = role;
 
-      userName.value = payload["unique_name"] || payload["name"] || payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || "Người dùng";
+      userName.value =
+        payload["unique_name"] ||
+        payload["name"] ||
+        payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] ||
+        "Người dùng";
     } catch (e) {
       console.error("Invalid token format", e);
     }
@@ -212,19 +308,27 @@ onMounted(() => {
 
 // Cập nhật lại logic active cho từng nhóm
 const isOperationActive = computed(() => {
-  return ['admin-dashboard', 'admin-pos', 'admin-kitchen'].includes(route.name as string);
+  return ["admin-dashboard"].includes(route.name as string);
+});
+
+const isPosActive = computed(() => {
+  return route.name === "admin-pos";
+});
+
+const isDashboardActive = computed(() => {
+  return ["admin-dashboard"].includes(route.name as string);
 });
 
 const isMenuActive = computed(() => {
-  return ['admin-categories', 'admin-products'].includes(route.name as string);
+  return ["admin-categories", "admin-products"].includes(route.name as string);
 });
 
 const isAccountActive = computed(() => {
-  return ['admin-users', 'admin-staffs'].includes(route.name as string);
+  return ["admin-users", "admin-staffs"].includes(route.name as string);
 });
 
 const isSystemActive = computed(() => {
-  return ['admin-areas', 'admin-tables'].includes(route.name as string);
+  return ["admin-areas", "admin-tables"].includes(route.name as string);
 });
 </script>
 
@@ -297,8 +401,12 @@ const isSystemActive = computed(() => {
   box-shadow: 0 0 15px rgba(255, 193, 7, 0.4);
 }
 
-.uppercase { text-transform: uppercase; }
-.letter-spacing-1 { letter-spacing: 0.5px; }
+.uppercase {
+  text-transform: uppercase;
+}
+.letter-spacing-1 {
+  letter-spacing: 0.5px;
+}
 
 .dropdown-menu {
   display: block;
@@ -335,7 +443,8 @@ const isSystemActive = computed(() => {
   font-size: 1.1rem;
 }
 
-.dropdown-item:hover, .dropdown-item.router-link-active {
+.dropdown-item:hover,
+.dropdown-item.router-link-active {
   background-color: rgba(255, 193, 7, 0.1);
   color: #ffc107;
 }
@@ -359,7 +468,8 @@ const isSystemActive = computed(() => {
   border-radius: 6px;
   margin-bottom: 5px;
 }
-.mobile-item:hover, .mobile-item.router-link-active {
+.mobile-item:hover,
+.mobile-item.router-link-active {
   background-color: rgba(255, 193, 7, 0.1);
   color: #ffc107;
 }

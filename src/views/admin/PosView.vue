@@ -1,10 +1,8 @@
 <template>
-  <div
-    class="pos-layout container-fluid px-0 d-flex flex-column overflow-hidden bg-light"
-  >
+  <div class="pos-layout container-fluid px-0 d-flex flex-column overflow-hidden bg-light">
     <div class="row g-0 flex-grow-1 overflow-hidden">
       <div
-        class="col-md-5 col-lg-4 border-end bg-white overflow-hidden shadow-sm z-1"
+        class="col-md-5 col-lg-4 border-end bg-white overflow-hidden shadow-sm z-1 h-100 d-flex flex-column"
       >
         <TableMap
           ref="tableMapRef"
@@ -15,10 +13,7 @@
       </div>
 
       <div class="col-md-7 col-lg-8 h-100 bg-light overflow-hidden">
-        <OperationsArea
-          :selectedTable="selectedTable"
-          @order-success="handleOrderSuccess"
-        />
+        <OperationsArea :selectedTable="selectedTable" @order-success="handleOrderSuccess" />
       </div>
     </div>
   </div>
@@ -49,7 +44,7 @@ const handleOrderSuccess = async (action?: string) => {
     selectedTable.value = null;
   } else if (action === "create" || action === "update") {
     const updatedTable = tableMapRef.value.tables.find(
-      (t: TableStatusDto) => t.tableId === selectedTableId.value
+      (t: TableStatusDto) => t.tableId === selectedTableId.value,
     );
     if (updatedTable) {
       selectedTable.value = {...updatedTable};
@@ -74,7 +69,11 @@ const handleTakeawaySelect = () => {
 
 <style scoped>
 .pos-layout {
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
   height: calc(100vh - 120px) !important;
 }
 
