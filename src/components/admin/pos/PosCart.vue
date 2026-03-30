@@ -246,15 +246,16 @@
 
               <template v-if="existingOrder && cart.length === 0">
                 <button
-                  class="btn btn-info btn-sm text-white fw-bold shadow-sm px-3"
+                  class="btn btn-info btn-sm text-white fw-bold shadow-sm px-5"
                   @click="emit('print-provisional')"
                   title="In Tạm Tính"
                 >
                   <i class="bi bi-printer-fill"></i>
+                  IN TẠM PHIẾU TÍNH
                 </button>
                 <button
                   class="btn btn-success btn-sm flex-grow-1 fw-bold shadow-sm"
-                  @click="emit('checkout', getCheckoutPayload())"
+                  @click="emit('print-provisional', getCheckoutPayload())"
                 >
                   THANH TOÁN
                 </button>
@@ -408,8 +409,11 @@ const getCheckoutPayload = () => ({
   customerId: selectedCustomer.value?.id || null,
   customerName: selectedCustomer.value?.fullName || searchQuery.value,
   customerPhone: selectedCustomer.value?.phoneNumber || null,
-  pointsUsed: pointsToUse.value, // 👉 Backend đã sẵn sàng nhận cục này
-  voucherId: null, // Chờ update giao diện voucher sau
+  pointsUsed: pointsToUse.value,
+  discountAmount: pointsDiscountAmount.value,
+  finalAmount: finalTotalAmount.value,
+  totalAmount: subTotalAmount.value,
+  voucherId: null,
 });
 </script>
 

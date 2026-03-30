@@ -5,7 +5,8 @@
         <div class="col-lg-4 col-md-6">
           <AppLogo size="28" class="mb-3" />
           <p class="text-secondary lh-lg mb-4">
-            Hơn cả một tách cà phê, chúng tôi mang đến một không gian số hóa hiện đại, nơi kết nối đam mê và sự tiện lợi cho mọi khách hàng.
+            Hơn cả một tách cà phê, chúng tôi mang đến một không gian số hóa hiện đại, nơi kết nối đam mê và
+            sự tiện lợi cho mọi khách hàng.
           </p>
           <div class="social-links d-flex gap-3">
             <a href="#" class="social-icon" title="Facebook">
@@ -35,15 +36,15 @@
           <ul class="list-unstyled contact-info">
             <li class="d-flex mb-3">
               <i class="bi bi-geo-alt-fill text-warning me-3"></i>
-              <span>123 Đường Bạch Đằng, Quận Hải Châu, Đà Nẵng</span>
+              <span>340 Tôn Đức Thắng, Quận Liên Chiểu, Đà Nẵng</span>
             </li>
             <li class="d-flex mb-3">
               <i class="bi bi-telephone-fill text-warning me-3"></i>
-              <span>0123 456 789</span>
+              <span>070 956 5352</span>
             </li>
             <li class="d-flex mb-3">
               <i class="bi bi-envelope-fill text-warning me-3"></i>
-              <span>contact@coffeehouse.com</span>
+              <span>coffeehouse@gmail.com</span>
             </li>
           </ul>
         </div>
@@ -66,8 +67,12 @@
 
       <hr class="border-secondary mt-5 mb-4 opacity-25" />
 
-      <div class="footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-        <p class="mb-0 text-secondary small">&copy; 2026 <strong>Coffee House</strong>. Tất cả quyền được bảo lưu.</p>
+      <div
+        class="footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-3"
+      >
+        <p class="mb-0 text-secondary small">
+          &copy; 2026 <strong>Coffee House</strong>. Tất cả quyền được bảo lưu.
+        </p>
         <p class="mb-0 text-secondary small">
           Designed with <i class="bi bi-heart-fill text-danger mx-1"></i> by
           <span class="text-warning fw-bold">{{ developerName }}</span>

@@ -41,7 +41,7 @@ const currentPageTitle = computed(() => {
 });
 
 const handleLogout = () => {
-  // Logic xóa token ở đây
+  localStorage.removeItem("token");
   router.push("/login");
 };
 </script>

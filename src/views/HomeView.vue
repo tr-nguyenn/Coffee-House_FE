@@ -1,16 +1,37 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue';
-import ProductCard from '@/components/ProductCard.vue';
-import HomeHero from '@/components/HomeHero.vue';
-import VoucherCard from '@/components/VoucherCard.vue';
-import type { Product } from '@/models/Product';
-import type { PagingInfo } from '@/types';
-import { productService } from '@/services/ProductService';
+import {ref, reactive, onMounted, computed} from "vue";
+import ProductCard from "@/components/ProductCard.vue";
+import HomeHero from "@/components/HomeHero.vue";
+import VoucherCard from "@/components/VoucherCard.vue";
+import type {Product} from "@/models/Product";
+import type {PagingInfo} from "@/types";
+import {productService} from "@/services/ProductService";
 
 const promotions = ref([
-  { id: 1, title: 'Giảm 20% Đơn Đầu Tiên', description: 'Áp dụng cho khách hàng mới khi mua các sản phẩm Cà phê truyền thống.', code: 'NEW20', discount: '20%', validUntil: '30/11/2026' },
-  { id: 2, title: 'Mua 2 Tặng 1', description: 'Khi mua 2 ly Trà trái cây bất kỳ, tặng ngay 1 ly cỡ nhỏ.', code: 'B2G1FREE', discount: '100% Ly 3', validUntil: '15/12/2026' },
-  { id: 3, title: 'Flash Sale Cuối Tuần', description: 'Giảm giá cực sốc vào thứ Bảy và Chủ Nhật cho toàn bộ sản phẩm đá xay.', code: 'WEEKEND50', discount: '50K', validUntil: 'Mỗi cuối tuần' }
+  {
+    id: 1,
+    title: "Giảm 20% Đơn Đầu Tiên",
+    description: "Áp dụng cho khách hàng mới khi mua các sản phẩm Cà phê truyền thống.",
+    code: "NEW20",
+    discount: "20%",
+    validUntil: "30/11/2026",
+  },
+  {
+    id: 2,
+    title: "Mua 2 Tặng 1",
+    description: "Khi mua 2 ly Trà trái cây bất kỳ, tặng ngay 1 ly cỡ nhỏ.",
+    code: "B2G1FREE",
+    discount: "100% Ly 3",
+    validUntil: "15/12/2026",
+  },
+  {
+    id: 3,
+    title: "Flash Sale Cuối Tuần",
+    description: "Giảm giá cực sốc vào thứ Bảy và Chủ Nhật cho toàn bộ sản phẩm đá xay.",
+    code: "WEEKEND50",
+    discount: "50K",
+    validUntil: "Mỗi cuối tuần",
+  },
 ]);
 
 const products = ref<Product[]>([]);
@@ -18,11 +39,11 @@ const loading = ref(false);
 
 const paging = reactive<PagingInfo>({
   pageNumber: 1,
-  pageSize: 8, 
+  pageSize: 16,
   totalCount: 0,
   totalPages: 0,
   hasPreviousPage: false,
-  hasNextPage: false
+  hasNextPage: false,
 });
 
 const fetchProducts = async (page = 1) => {
@@ -31,12 +52,12 @@ const fetchProducts = async (page = 1) => {
   try {
     const response = await productService.getAll({
       pageNumber: paging.pageNumber,
-      pageSize: paging.pageSize
+      pageSize: paging.pageSize,
     });
-    
+
     const data = response.data || response;
     products.value = data.items || [];
-    
+
     paging.totalCount = data.totalCount || 0;
     paging.totalPages = data.totalPages || Math.ceil(paging.totalCount / paging.pageSize) || 0;
   } catch (error) {
@@ -58,8 +79,8 @@ const changePage = (newPage: number) => {
 const displayedPages = computed(() => {
   const current = paging.pageNumber;
   const total = paging.totalPages || 0;
-  const delta = 2; 
-  
+  const delta = 2;
+
   if (total <= 1) return [];
 
   let start = Math.max(1, current - delta);
@@ -81,7 +102,7 @@ const displayedPages = computed(() => {
 </script>
 
 <template>
-  <div class="home bg-dark" style="min-height: 100vh;">
+  <div class="home bg-dark" style="min-height: 100vh">
     <HomeHero />
 
     <!-- Khuyến mãi Section -->
@@ -91,10 +112,10 @@ const displayedPages = computed(() => {
           <i class="bi bi-gift-fill text-warning fs-3 me-3"></i>
           <h3 class="fw-bold text-white mb-0">Khuyến mãi & Ưu đãi đặc biệt</h3>
         </div>
-        
+
         <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
           <div class="col" v-for="promo in promotions" :key="promo.id">
-            <VoucherCard 
+            <VoucherCard
               :title="promo.title"
               :description="promo.description"
               :code="promo.code"
@@ -114,7 +135,9 @@ const displayedPages = computed(() => {
           <div class="d-flex justify-content-center">
             <div class="divider bg-warning rounded-pill"></div>
           </div>
-          <p class="text-light opacity-75 mt-2">Những thức uống được khách hàng yêu thích nhất tại không gian của chúng tôi.</p>
+          <p class="text-light opacity-75 mt-2">
+            Những thức uống được khách hàng yêu thích nhất tại không gian của chúng tôi.
+          </p>
         </div>
 
         <div v-if="loading" class="text-center py-5">
@@ -132,27 +155,37 @@ const displayedPages = computed(() => {
             <ProductCard :product="product" />
           </div>
         </div>
-        
+
         <!-- Phân trang (Pagination) -->
         <div v-if="paging.totalPages > 1 && !loading" class="d-flex justify-content-center mt-5">
           <nav aria-label="Page navigation">
             <ul class="pagination pagination-lg mb-0">
-              <li class="page-item" :class="{ disabled: !paging.hasPreviousPage }">
-                <button class="page-link shadow-sm bg-dark text-light border-secondary hover-bg-light" @click="changePage(paging.pageNumber - 1)" aria-label="Previous">
+              <li class="page-item" :class="{disabled: !paging.hasPreviousPage}">
+                <button
+                  class="page-link shadow-sm bg-dark text-light border-secondary hover-bg-light"
+                  @click="changePage(paging.pageNumber - 1)"
+                  aria-label="Previous"
+                >
                   <span aria-hidden="true">&laquo;</span>
                 </button>
               </li>
-              
-              <li 
-                class="page-item" 
-                v-for="page in displayedPages" 
-                :key="page" 
-                :class="{ active: page === paging.pageNumber }"
+
+              <li
+                class="page-item"
+                v-for="page in displayedPages"
+                :key="page"
+                :class="{active: page === paging.pageNumber}"
               >
-                <button class="page-link shadow-sm border-secondary" @click="changePage(page)">{{ page }}</button>
-              </li>             
-              <li class="page-item" :class="{ disabled: !paging.hasNextPage }">
-                <button class="page-link shadow-sm bg-dark text-light border-secondary hover-bg-light" @click="changePage(paging.pageNumber + 1)" aria-label="Next">
+                <button class="page-link shadow-sm border-secondary" @click="changePage(page)">
+                  {{ page }}
+                </button>
+              </li>
+              <li class="page-item" :class="{disabled: !paging.hasNextPage}">
+                <button
+                  class="page-link shadow-sm bg-dark text-light border-secondary hover-bg-light"
+                  @click="changePage(paging.pageNumber + 1)"
+                  aria-label="Next"
+                >
                   <span aria-hidden="true">&raquo;</span>
                 </button>
               </li>
@@ -160,7 +193,10 @@ const displayedPages = computed(() => {
           </nav>
         </div>
         <div class="text-center mt-5">
-          <router-link to="/menu" class="btn btn-warning text-dark fw-bold btn-lg px-5 rounded-pill hover-lift shadow">
+          <router-link
+            to="/menu"
+            class="btn btn-warning text-dark fw-bold btn-lg px-5 rounded-pill hover-lift shadow"
+          >
             Tất cả sản phẩm
             <i class="bi bi-arrow-right ms-2 text-dark"></i>
           </router-link>
@@ -181,17 +217,19 @@ const displayedPages = computed(() => {
 }
 
 .hover-lift {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .hover-lift:hover {
   transform: translateY(-3px);
-  box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15) !important;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
 }
 
 .pagination .page-link {
-  background-color: #212529; 
-  color: #f8f9fa; 
+  background-color: #212529;
+  color: #f8f9fa;
   border-color: #495057;
 }
 .pagination .page-item.active .page-link {
@@ -201,7 +239,7 @@ const displayedPages = computed(() => {
   font-weight: bold;
 }
 .pagination .page-link:hover:not(.active) {
-  background-color: #343a40 !important; 
+  background-color: #343a40 !important;
   color: #ffc107 !important;
   border-color: #495057;
 }

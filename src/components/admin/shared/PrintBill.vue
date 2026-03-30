@@ -3,13 +3,9 @@
     <div class="bill-container">
       <div class="text-center mb-3">
         <h4 class="fw-bold mb-1">COFFEE HOUSE</h4>
-        <p class="mb-0" style="font-size: 12px">
-          123 Đường Bán Cà Phê, Đà Nẵng
-        </p>
+        <p class="mb-0" style="font-size: 12px">123 Đường Bán Cà Phê, Đà Nẵng</p>
         <p class="mb-0" style="font-size: 12px">SĐT: 0123.456.789</p>
-        <h5
-          class="fw-bold mt-2 border-top border-bottom py-1 border-dark dashed-border"
-        >
+        <h5 class="fw-bold mt-2 border-top border-bottom py-1 border-dark dashed-border">
           {{ order.isProvisional ? "PHIẾU TẠM TÍNH" : "HÓA ĐƠN THANH TOÁN" }}
         </h5>
       </div>
@@ -21,26 +17,25 @@
         </div>
         <div class="d-flex justify-content-between">
           <span>Ngày:</span>
-          <span>{{
-            new Date(order.createdAt || Date.now()).toLocaleString("vi-VN")
-          }}</span>
+          <span>{{ new Date(order.createdAt || Date.now()).toLocaleString("vi-VN") }}</span>
         </div>
         <div class="d-flex justify-content-between">
           <span>Bàn:</span>
           <span class="fw-bold">{{ order.tableName || "Mang đi" }}</span>
         </div>
         <div class="d-flex justify-content-between">
-          <span>Thu ngân:</span> <span>Admin</span>
+          <span>Thu ngân:</span>
+          <span>Admin</span>
+        </div>
+        <div class="d-flex justify-content-between" v-if="order.customerName">
+          <span>Khách:</span>
+          <span class="fw-bold text-end" style="max-width: 150px">{{ order.customerName }}</span>
         </div>
       </div>
 
       <table
         class="w-100 mb-2"
-        style="
-          font-size: 12px;
-          border-top: 1px dashed #000;
-          border-bottom: 1px dashed #000;
-        "
+        style="font-size: 12px; border-top: 1px dashed #000; border-bottom: 1px dashed #000"
       >
         <thead>
           <tr class="border-bottom border-dark border-dashed">
@@ -53,9 +48,7 @@
           <tr v-for="item in order.orderDetails" :key="item.productId">
             <td class="py-1 pe-1">
               {{ item.productName || item.name }}
-              <div v-if="item.note" style="font-size: 10px; font-style: italic">
-                ({{ item.note }})
-              </div>
+              <div v-if="item.note" style="font-size: 10px; font-style: italic">({{ item.note }})</div>
             </td>
             <td class="py-1 text-center align-top">{{ item.quantity }}</td>
             <td class="py-1 text-end align-top">
@@ -66,26 +59,34 @@
       </table>
 
       <div class="mb-3" style="font-size: 13px">
-        <div class="d-flex justify-content-between fw-bold fs-6 mt-1">
-          <span>TỔNG CỘNG:</span>
+        <div class="d-flex justify-content-between mt-1">
+          <span>Tổng tiền món:</span>
+          <span>{{ formatVND(order.totalAmount || order.finalAmount) }}</span>
+        </div>
+
+        <div v-if="order.discountAmount > 0" class="d-flex justify-content-between mt-1">
+          <span>Giảm giá:</span>
+          <span>- {{ formatVND(order.discountAmount) }}</span>
+        </div>
+
+        <div
+          class="d-flex justify-content-between fw-bold fs-6 mt-1 pt-1"
+          style="border-top: 1px dashed #000"
+        >
+          <span>THỰC THU:</span>
           <span>{{ formatVND(order.finalAmount) }}</span>
         </div>
-        <div
-          class="d-flex justify-content-between text-muted"
-          style="font-size: 11px"
-        >
+
+        <div class="d-flex justify-content-between text-muted mt-1" style="font-size: 11px">
           <span>Thanh toán:</span>
           <span>{{
-            order.isProvisional
-              ? "Chưa thanh toán"
-              : getPaymentMethodName(order.paymentMethod)
+            order.isProvisional ? "Chưa thanh toán" : getPaymentMethodName(order.paymentMethod)
           }}</span>
         </div>
       </div>
 
       <div class="text-center mt-3" style="font-size: 12px">
         <p class="fst-italic mb-0">Cảm ơn quý khách & Hẹn gặp lại!</p>
-        <p class="mb-0">Powered by Nguyễn Trung Nguyên</p>
       </div>
     </div>
   </div>
