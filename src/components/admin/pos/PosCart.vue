@@ -6,129 +6,116 @@
         selectedTable?.tableId === 'TAKEAWAY'
           ? 'bg-warning text-dark'
           : selectedTable
-          ? 'bg-dark text-white'
-          : 'bg-secondary text-white'
+            ? 'bg-dark text-white'
+            : 'bg-secondary text-white'
       "
     >
       <h6 class="mb-0 fw-bold">
         <i
           class="bi"
-          :class="
-            selectedTable?.tableId === 'TAKEAWAY'
-              ? 'bi-bag-check-fill'
-              : 'bi-geo-alt-fill'
-          "
+          :class="selectedTable?.tableId === 'TAKEAWAY' ? 'bi-bag-check-fill' : 'bi-geo-alt-fill'"
         ></i>
         {{ selectedTable ? ` ${selectedTable.tableName}` : "Chưa chọn bàn" }}
       </h6>
 
       <div v-if="selectedTable && selectedTable.tableId !== 'TAKEAWAY'">
-        <span v-if="selectedTable.isInUse" class="badge bg-danger"
-          >Có Khách</span
-        >
+        <span v-if="selectedTable.isInUse" class="badge bg-danger">Có Khách</span>
         <span v-else class="badge bg-success">Trống</span>
       </div>
     </div>
 
     <div v-if="selectedTable" class="px-2 py-2 bg-light border-bottom z-3">
-      <div class="d-flex gap-2">
-        <div class="position-relative" style="flex: 5.5">
-          <div
-            v-if="selectedCustomer"
-            class="d-flex justify-content-between align-items-center px-2 py-1 bg-success bg-opacity-10 border border-success rounded h-100"
-          >
-            <div class="d-flex align-items-center min-w-0">
-              <i class="bi bi-person-check-fill text-success me-2"></i>
-              <span class="fw-bold text-dark small text-truncate">{{
-                selectedCustomer.fullName
-              }}</span>
-              <span class="badge bg-warning text-dark ms-2 flex-shrink-0"
-                >{{ selectedCustomer.rewardPoints || 0 }} đ</span
-              >
-            </div>
-            <button
-              class="btn btn-sm btn-link text-danger p-0 ms-2 flex-shrink-0"
-              @click="clearCustomer"
+      <div class="d-flex flex-column gap-2">
+        <div class="d-flex gap-2">
+          <div class="position-relative" style="flex: 5.5">
+            <div
+              v-if="selectedCustomer"
+              class="d-flex justify-content-between align-items-center px-2 py-1 bg-success bg-opacity-10 border border-success rounded h-100"
             >
-              <i class="bi bi-x-circle-fill"></i>
-            </button>
+              <div class="d-flex align-items-center min-w-0">
+                <i class="bi bi-person-check-fill text-success me-2"></i>
+                <span class="fw-bold text-dark small text-truncate">{{ selectedCustomer.fullName }}</span>
+                <span class="badge bg-warning text-dark ms-2 flex-shrink-0"
+                  >{{ selectedCustomer.rewardPoints || 0 }} điểm</span
+                >
+              </div>
+              <button class="btn btn-sm btn-link text-danger p-0 ms-2 flex-shrink-0" @click="clearCustomer">
+                <i class="bi bi-x-circle-fill"></i>
+              </button>
+            </div>
+
+            <div v-else class="input-group input-group-sm h-100">
+              <span class="input-group-text bg-white border-end-0 pe-1"
+                ><i class="bi bi-person text-muted"></i
+              ></span>
+              <input
+                type="text"
+                class="form-control border-start-0 ps-1"
+                placeholder="Tìm tên/SĐT khách..."
+                v-model="searchQuery"
+                @input="handleSearch"
+                @focus="showDropdown = true"
+                @blur="hideDropdownDelay"
+              />
+            </div>
+
+            <ul
+              v-if="showDropdown && searchQuery"
+              class="dropdown-menu show w-100 position-absolute shadow-sm"
+              style="top: 100%; z-index: 1050; font-size: 0.85rem"
+            >
+              <li v-if="isSearching" class="dropdown-item text-center text-muted py-1">
+                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+              </li>
+              <li v-for="c in suggestedCustomers" :key="c.id" @click="selectCustomer(c)">
+                <a
+                  class="dropdown-item cursor-pointer py-1 d-flex justify-content-between align-items-center"
+                >
+                  <span class="text-truncate">{{ c.fullName }} - {{ c.phoneNumber }}</span>
+                  <span class="badge bg-warning text-dark flex-shrink-0">{{ c.rewardPoints || 0 }} đ</span>
+                </a>
+              </li>
+              <li v-if="!isSearching && suggestedCustomers.length === 0">
+                <a class="dropdown-item text-primary cursor-pointer fw-bold py-1" @click="triggerAddCustomer">
+                  <i class="bi bi-plus-circle"></i> Thêm mới khách này
+                </a>
+              </li>
+            </ul>
           </div>
 
-          <div v-else class="input-group input-group-sm h-100">
+          <div class="input-group input-group-sm" style="flex: 4.5">
             <span class="input-group-text bg-white border-end-0 pe-1"
-              ><i class="bi bi-person text-muted"></i
+              ><i class="bi bi-ticket-perforated text-muted"></i
             ></span>
             <input
               type="text"
               class="form-control border-start-0 ps-1"
-              placeholder="Tìm tên/SĐT khách..."
-              v-model="searchQuery"
-              @input="handleSearch"
-              @focus="showDropdown = true"
-              @blur="hideDropdownDelay"
+              placeholder="Mã Voucher..."
+              v-model="voucherCode"
             />
           </div>
-
-          <ul
-            v-if="showDropdown && searchQuery"
-            class="dropdown-menu show w-100 position-absolute shadow-sm"
-            style="top: 100%; z-index: 1050; font-size: 0.85rem"
-          >
-            <li
-              v-if="isSearching"
-              class="dropdown-item text-center text-muted py-1"
-            >
-              <div
-                class="spinner-border spinner-border-sm text-primary"
-                role="status"
-              ></div>
-            </li>
-            <li
-              v-for="c in suggestedCustomers"
-              :key="c.id"
-              @click="selectCustomer(c)"
-            >
-              <a
-                class="dropdown-item cursor-pointer py-1 d-flex justify-content-between align-items-center"
-              >
-                <span class="text-truncate"
-                  >{{ c.fullName }} - {{ c.phoneNumber }}</span
-                >
-                <span class="badge bg-warning text-dark flex-shrink-0"
-                  >{{ c.rewardPoints || 0 }} đ</span
-                >
-              </a>
-            </li>
-            <li v-if="!isSearching && suggestedCustomers.length === 0">
-              <a
-                class="dropdown-item text-primary cursor-pointer fw-bold py-1"
-                @click="openAddCustomerModal"
-              >
-                <i class="bi bi-plus-circle"></i> Thêm mới
-              </a>
-            </li>
-          </ul>
         </div>
 
-        <div class="input-group input-group-sm" style="flex: 4.5">
-          <span class="input-group-text bg-white border-end-0 pe-1"
-            ><i class="bi bi-ticket-perforated text-muted"></i
-          ></span>
+        <div
+          v-if="selectedCustomer && selectedCustomer.rewardPoints > 0"
+          class="form-check form-switch ms-1 mt-1"
+        >
           <input
-            type="text"
-            class="form-control border-start-0 ps-1"
-            placeholder="Mã Voucher..."
-            v-model="voucherCode"
+            class="form-check-input cursor-pointer"
+            type="checkbox"
+            id="switchPoints"
+            v-model="useRewardPoints"
           />
+          <label class="form-check-label small fw-semibold text-muted cursor-pointer" for="switchPoints">
+            Dùng tối đa <span class="text-warning fw-bold">{{ pointsToUse }} điểm</span> để giảm
+            <span class="text-danger fw-bold">{{ formatVND(pointsDiscountAmount) }}</span>
+          </label>
         </div>
       </div>
     </div>
 
     <div class="flex-grow-1 overflow-auto bg-white custom-scrollbar px-2 py-1">
-      <div
-        v-if="!existingOrder && cart.length === 0"
-        class="text-center text-muted py-5 mt-4"
-      >
+      <div v-if="!existingOrder && cart.length === 0" class="text-center text-muted py-5 mt-4">
         <i class="bi bi-cart-x display-3 opacity-25"></i>
         <h6 class="mt-2">Giỏ hàng trống</h6>
       </div>
@@ -136,9 +123,7 @@
       <div v-else>
         <div v-if="existingItems.length > 0" class="mb-3">
           <h6 class="text-muted fw-bold mb-1 small px-1 bg-light py-1 rounded">
-            <i class="bi bi-clock-history"></i> MÓN ĐÃ GỌI ({{
-              existingItems.length
-            }})
+            <i class="bi bi-clock-history"></i> MÓN ĐÃ GỌI ({{ existingItems.length }})
           </h6>
           <div
             v-for="item in existingItems"
@@ -150,8 +135,7 @@
                 {{ item.productName || item.name || "Món" }}
               </div>
               <div class="text-muted" style="font-size: 0.75rem">
-                {{ formatVND(item.unitPrice || item.price) }} x
-                {{ item.quantity }}
+                {{ formatVND(item.unitPrice || item.price) }} x {{ item.quantity }}
               </div>
             </div>
             <div class="fw-bold text-success small text-nowrap">
@@ -161,9 +145,7 @@
         </div>
 
         <div v-if="cart.length > 0">
-          <h6
-            class="text-muted fw-bold mb-1 small px-1 bg-warning bg-opacity-10 py-1 rounded text-warning"
-          >
+          <h6 class="text-muted fw-bold mb-1 small px-1 bg-warning bg-opacity-10 py-1 rounded text-warning">
             <i class="bi bi-cart-plus"></i> MÓN MỚI ({{ cart.length }})
           </h6>
           <div
@@ -172,28 +154,17 @@
             class="py-2 border-bottom position-relative item-row"
           >
             <div class="d-flex justify-content-between align-items-start mb-1">
-              <div
-                class="fw-bold text-dark small text-truncate pe-2 flex-grow-1"
-              >
-                {{ item.name }}
-              </div>
+              <div class="fw-bold text-dark small text-truncate pe-2 flex-grow-1">{{ item.name }}</div>
               <div class="fw-bold text-danger small text-nowrap">
                 {{ formatVND(item.unitPrice * item.quantity) }}
               </div>
             </div>
 
             <div class="d-flex justify-content-between align-items-center">
-              <div
-                class="input-group input-group-sm qty-group"
-                style="width: 85px"
-              >
+              <div class="input-group input-group-sm qty-group" style="width: 85px">
                 <button
                   class="btn btn-outline-secondary px-2 py-0"
-                  @click="
-                    item.quantity > 1
-                      ? item.quantity--
-                      : emit('remove-item', item)
-                  "
+                  @click="item.quantity > 1 ? item.quantity-- : emit('remove-item', item)"
                 >
                   -
                 </button>
@@ -204,12 +175,7 @@
                   min="1"
                   style="height: 24px"
                 />
-                <button
-                  class="btn btn-outline-secondary px-2 py-0"
-                  @click="item.quantity++"
-                >
-                  +
-                </button>
+                <button class="btn btn-outline-secondary px-2 py-0" @click="item.quantity++">+</button>
               </div>
 
               <div class="d-flex gap-1">
@@ -220,10 +186,7 @@
                   placeholder="+ Ghi chú"
                   v-model="item.note"
                 />
-                <button
-                  class="btn btn-sm btn-link text-danger p-0 px-1"
-                  @click="emit('remove-item', item)"
-                >
+                <button class="btn btn-sm btn-link text-danger p-0 px-1" @click="emit('remove-item', item)">
                   <i class="bi bi-trash-fill"></i>
                 </button>
               </div>
@@ -234,29 +197,35 @@
     </div>
 
     <div class="flex-shrink-0 bg-white shadow-lg p-2 z-3 border-top">
-      <div class="d-flex justify-content-between align-items-center mb-2 px-1">
-        <span class="fw-bold text-muted small">TỔNG TIỀN</span>
-        <span class="fs-4 fw-bolder text-danger lh-1">{{
-          formatVND(totalAmount)
-        }}</span>
+      <div
+        class="d-flex justify-content-between align-items-center mb-1 px-1"
+        v-if="pointsDiscountAmount > 0"
+      >
+        <span class="text-muted small">Tổng phụ</span>
+        <span class="fw-semibold">{{ formatVND(subTotalAmount) }}</span>
+      </div>
+      <div
+        class="d-flex justify-content-between align-items-center mb-1 px-1"
+        v-if="pointsDiscountAmount > 0"
+      >
+        <span class="text-muted small">Trừ điểm</span>
+        <span class="fw-semibold text-success">- {{ formatVND(pointsDiscountAmount) }}</span>
+      </div>
+      <div class="d-flex justify-content-between align-items-center mb-2 px-1 border-top pt-1">
+        <span class="fw-bold text-dark small">KHÁCH CẦN TRẢ</span>
+        <span class="fs-4 fw-bolder text-danger lh-1">{{ formatVND(finalTotalAmount) }}</span>
       </div>
 
       <div v-if="selectedTable" class="row g-1">
         <template v-if="selectedTable.tableId !== 'TAKEAWAY'">
           <div class="col-12" v-if="!selectedTable.isInUse">
-            <button
-              class="btn btn-primary w-100 py-2 fw-bold shadow-sm"
-              @click="emit('open-table')"
-            >
+            <button class="btn btn-primary w-100 py-2 fw-bold shadow-sm" @click="emit('open-table')">
               <i class="bi bi-unlock-fill me-1"></i> MỞ BÀN
             </button>
           </div>
 
           <template v-else>
-            <div
-              class="col-12 d-flex gap-1"
-              v-if="cart.length > 0 || existingOrder"
-            >
+            <div class="col-12 d-flex gap-1" v-if="cart.length > 0 || existingOrder">
               <select
                 class="form-select form-select-sm bg-light fw-semibold"
                 v-model="selectedPaymentMethod"
@@ -319,17 +288,17 @@
 </template>
 
 <script setup lang="ts">
-import {ref, computed} from "vue";
+import {ref, computed, watch} from "vue";
 import {formatVND} from "@/utils/helpers";
 import type {OrderDetailDto} from "./OperationsArea.vue";
-import {toast} from "@/utils/toast";
-import {userService} from "@/services/UserService";
+import {userService} from "@/services/CustomerService";
 
 const props = defineProps<{
   selectedTable: any;
   cart: OrderDetailDto[];
   existingOrder: any;
 }>();
+
 const emit = defineEmits([
   "remove-item",
   "send-to-kitchen",
@@ -337,19 +306,56 @@ const emit = defineEmits([
   "open-table",
   "change-table",
   "print-provisional",
+  "add-customer",
 ]);
 
 const existingItems = computed(() => props.existingOrder?.orderDetails || []);
 
 const voucherCode = ref("");
 const selectedPaymentMethod = ref("Cash");
-
 const searchQuery = ref("");
 const isSearching = ref(false);
 const showDropdown = ref(false);
 const suggestedCustomers = ref<any[]>([]);
 const selectedCustomer = ref<any>(null);
 let searchTimeout: any = null;
+
+// 👉 BIẾN ĐIỀU KHIỂN TRỪ ĐIỂM
+const useRewardPoints = ref(false);
+const DISCOUNT_PER_POINT = 1000; // Cấu hình 1 điểm = 1.000đ (Phải khớp với C#)
+
+// Reset công tắc trừ điểm mỗi khi đổi khách hàng
+watch(selectedCustomer, () => {
+  useRewardPoints.value = false;
+});
+
+// Tính tổng tiền gốc (Chưa trừ điểm)
+const subTotalAmount = computed(() => {
+  let oldTotal = props.existingOrder?.finalAmount || 0;
+  let newTotal = props.cart.reduce((sum, item) => sum + (item.unitPrice || 0) * Number(item.quantity), 0);
+  return oldTotal + newTotal;
+});
+
+// Thuật toán tính số điểm TỐI ĐA được phép dùng (Không cho trừ âm tiền)
+const pointsToUse = computed(() => {
+  if (!useRewardPoints.value || !selectedCustomer.value || !selectedCustomer.value.rewardPoints) return 0;
+
+  // Tính xem Bill này quy ra được tối đa bao nhiêu điểm
+  const maxPointsByBill = Math.floor(subTotalAmount.value / DISCOUNT_PER_POINT);
+
+  // Trả về con số nhỏ hơn giữa (Điểm khách có) và (Điểm tối đa bill cho phép)
+  return Math.min(selectedCustomer.value.rewardPoints, maxPointsByBill);
+});
+
+// Tiền được giảm
+const pointsDiscountAmount = computed(() => {
+  return pointsToUse.value * DISCOUNT_PER_POINT;
+});
+
+// Khách cần trả cuối cùng
+const finalTotalAmount = computed(() => {
+  return subTotalAmount.value - pointsDiscountAmount.value;
+});
 
 const handleSearch = () => {
   showDropdown.value = true;
@@ -364,10 +370,7 @@ const handleSearch = () => {
 
   searchTimeout = setTimeout(async () => {
     try {
-      const res = await userService.getAll({
-        search: searchQuery.value,
-        pageSize: 15,
-      });
+      const res = await userService.getAll({search: searchQuery.value, pageSize: 15});
       suggestedCustomers.value = (res.data || res).items || [];
     } catch (error) {
       console.error(error);
@@ -392,25 +395,21 @@ const hideDropdownDelay = () =>
     showDropdown.value = false;
   }, 200);
 
-const openAddCustomerModal = () => {
-  toast.success(`Thêm khách: ${searchQuery.value} sẽ sớm ra mắt!`);
+// 👉 GỌI COMPONENT CHA XỬ LÝ VIỆC THÊM KHÁCH
+const triggerAddCustomer = () => {
+  // Bắn sự kiện ra ngoài kèm theo SĐT/Tên vừa gõ để Component cha mở Modal
+  emit("add-customer", searchQuery.value);
   showDropdown.value = false;
 };
 
+// Đóng gói Dữ liệu gửi xuống Backend
 const getCheckoutPayload = () => ({
   paymentMethod: selectedPaymentMethod.value,
   customerId: selectedCustomer.value?.id || null,
   customerName: selectedCustomer.value?.fullName || searchQuery.value,
   customerPhone: selectedCustomer.value?.phoneNumber || null,
-});
-
-const totalAmount = computed(() => {
-  let oldTotal = props.existingOrder?.finalAmount || 0;
-  let newTotal = props.cart.reduce(
-    (sum, item) => sum + (item.unitPrice || 0) * Number(item.quantity),
-    0
-  );
-  return oldTotal + newTotal;
+  pointsUsed: pointsToUse.value, // 👉 Backend đã sẵn sàng nhận cục này
+  voucherId: null, // Chờ update giao diện voucher sau
 });
 </script>
 
@@ -428,13 +427,11 @@ const totalAmount = computed(() => {
 .min-w-0 {
   min-width: 0;
 }
-
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
-
 .qty-group .btn {
   border-color: #dee2e6;
   color: #495057;

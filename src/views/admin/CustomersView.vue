@@ -40,19 +40,19 @@
       @change="handlePageChange"
     />
 
-    <UserModal ref="customerModalRef" @saved="fetchData(paging.pageNumber)" />
+    <CustomerModal ref="customerModalRef" @saved="fetchData(paging.pageNumber)" />
   </div>
 </template>
 
 <script setup lang="ts">
 import {ref, reactive, onMounted, computed} from "vue";
-import type {User} from "@/models/User";
+import type {Customer} from "@/models/Customer";
 import type {PagingInfo, TableColumn} from "@/types";
 import BaseToolbar from "@/components/admin/shared/BaseToolbar.vue";
 import BaseTable from "@/components/admin/shared/BaseTable.vue";
 import BasePagination from "@/components/admin/shared/BasePagination.vue";
-import UserModal from "@/components/admin/UserModal.vue"; // Nếu mi đổi tên file thì nhớ đổi import ở đây nha
-import {userService} from "@/services/UserService";
+import CustomerModal from "@/components/admin/CustomerModal.vue";
+import {userService} from "@/services/CustomerService";
 import {toast} from "@/utils/toast";
 import {confirmDelete} from "@/utils/swal";
 
@@ -62,7 +62,7 @@ const userCols: TableColumn[] = [
   {label: "Điểm thưởng", key: "rewardPoints"},
 ];
 
-const users = ref<User[]>([]);
+const users = ref<Customer[]>([]);
 const loading = ref(false);
 const customerModalRef = ref();
 const searchKeyword = ref("");
@@ -77,11 +77,9 @@ const paging = reactive<PagingInfo>({
 });
 
 const pagingFrom = computed(() =>
-  paging.totalCount === 0 ? 0 : (paging.pageNumber - 1) * paging.pageSize + 1
+  paging.totalCount === 0 ? 0 : (paging.pageNumber - 1) * paging.pageSize + 1,
 );
-const pagingTo = computed(() =>
-  Math.min(paging.pageNumber * paging.pageSize, paging.totalCount)
-);
+const pagingTo = computed(() => Math.min(paging.pageNumber * paging.pageSize, paging.totalCount));
 
 const fetchData = async (page = 1) => {
   loading.value = true;
@@ -112,14 +110,14 @@ const onSearch = (value: string) => {
   }, 500);
 };
 
-const openModal = (item?: User) => {
+const openModal = (item?: Customer) => {
   customerModalRef.value?.show(item);
 };
 
 const handleDelete = async (id: string) => {
   const result = await confirmDelete(
     "Khóa tài khoản?",
-    "Khách hàng đã mua hàng sẽ không thể xóa, chỉ có thể khóa!"
+    "Khách hàng đã mua hàng sẽ không thể xóa, chỉ có thể khóa!",
   );
   if (result.isConfirmed) {
     try {
@@ -127,8 +125,7 @@ const handleDelete = async (id: string) => {
       await fetchData(paging.pageNumber);
       toast.success("Đã xử lý khách hàng thành công!");
     } catch (error: any) {
-      const msg =
-        error.response?.data?.message || "Không thể xóa khách hàng này.";
+      const msg = error.response?.data?.message || "Không thể xóa khách hàng này.";
       toast.error(msg);
     }
   }

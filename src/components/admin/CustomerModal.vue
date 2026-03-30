@@ -13,7 +13,7 @@
           type="text"
           class="form-control premium-input"
           placeholder="VD: Nguyễn Văn A..."
-          :class="{ 'is-invalid': errors.fullName }"
+          :class="{'is-invalid': errors.fullName}"
         />
         <div class="invalid-feedback" v-if="errors.fullName">{{ errors.fullName }}</div>
       </div>
@@ -25,7 +25,7 @@
           type="tel"
           class="form-control premium-input"
           placeholder="VD: 0912345678"
-          :class="{ 'is-invalid': errors.phoneNumber }"
+          :class="{'is-invalid': errors.phoneNumber}"
         />
         <div class="invalid-feedback" v-if="errors.phoneNumber">{{ errors.phoneNumber }}</div>
       </div>
@@ -44,33 +44,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import {ref, reactive} from "vue";
 import BaseModal from "./shared/BaseModal.vue";
-import { userService } from "@/services/UserService";
-import type { User } from "@/models/User";
-import { toast } from "@/utils/toast";
+import {userService} from "@/services/CustomerService";
+import type {Customer} from "@/models/Customer";
+import {toast} from "@/utils/toast";
 
 const emit = defineEmits(["saved"]);
 
 const baseModalRef = ref();
 const isEdit = ref(false);
 const submitting = ref(false);
-const errors = reactive({ fullName: "", phoneNumber: "" });
+const errors = reactive({fullName: "", phoneNumber: ""});
 
-const form = reactive<User>({
+const form = reactive<Customer>({
   id: undefined,
   fullName: "",
   phoneNumber: "",
   rewardPoints: 0,
 });
 
-const show = (item?: User) => {
+const show = (item?: Customer) => {
   errors.fullName = "";
   errors.phoneNumber = "";
 
   if (item) {
     isEdit.value = true;
-    Object.assign(form, { ...item });
+    Object.assign(form, {...item});
   } else {
     isEdit.value = false;
     form.id = undefined;
@@ -127,7 +127,7 @@ const handleSave = async () => {
   }
 };
 
-defineExpose({ show });
+defineExpose({show});
 </script>
 
 <style scoped>
@@ -151,7 +151,7 @@ defineExpose({ show });
 
 .premium-input:focus {
   background-color: #ffffff !important;
-  border-color: #4F46E5 !important;
+  border-color: #4f46e5 !important;
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12) !important;
   outline: none;
 }

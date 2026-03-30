@@ -71,7 +71,7 @@ const router = createRouter({
         {
           path: "users",
           name: "admin-users",
-          component: () => import("@/views/admin/UsersView.vue"),
+          component: () => import("@/views/admin/CustomersView.vue"),
           meta: {roles: ["Admin", "Staff"]},
         },
         {
@@ -128,15 +128,12 @@ router.beforeEach((to, _from, next) => {
             .map(function (c) {
               return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
             })
-            .join("")
+            .join(""),
         );
 
         const payload = JSON.parse(jsonPayload);
         const rawRole =
-          payload["role"] ||
-          payload[
-            "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-          ];
+          payload["role"] || payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
 
         userRole = Array.isArray(rawRole) ? rawRole[0] : rawRole;
       }

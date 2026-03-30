@@ -19,4 +19,5 @@ export interface TableStatusDto {
   activeOrderId: string | null;
   activeOrderTime: Date;
   displayOrder: number;
+  areaDisplayOrder: number;
 }

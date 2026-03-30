@@ -1,6 +1,11 @@
 <template>
   <div class="admin-content-inner">
-    <BaseToolbar placeholder="Tìm tên sản phẩm..." btnLabel="Thêm sản phẩm" @search="onSearch" @add="openModal" />
+    <BaseToolbar
+      placeholder="Tìm tên sản phẩm..."
+      btnLabel="Thêm sản phẩm"
+      @search="onSearch"
+      @add="openModal"
+    />
 
     <BaseTable
       :columns="productCols"
@@ -17,20 +22,28 @@
         </span>
       </template>
       <template #col-price="{item}">
-        <span class="fw-bold">{{ formatVND(item.price) }}</span>
+        <div class="d-flex justify-content-center">
+          <span class="fw-bold">{{ formatVND(item.price) }}</span>
+        </div>
       </template>
       <template #col-category="{item}">
         <span>{{ item.categoryName || "Chi tiết..." }}</span>
       </template>
       <template #col-status="{item}">
-        <div @click.stop="handleToggleStatus(item)" class="status-badge-wrapper d-flex justify-content-center">
+        <div
+          @click.stop="handleToggleStatus(item)"
+          class="status-badge-wrapper d-flex justify-content-center"
+        >
           <span
             v-if="item.isAvailable"
             class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success px-3 py-2 fw-bold custom-hover-badge"
           >
             <i class="bi bi-check-circle-fill me-1"></i> Đang bán
           </span>
-          <span v-else class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger px-3 py-2 fw-bold custom-hover-badge">
+          <span
+            v-else
+            class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger px-3 py-2 fw-bold custom-hover-badge"
+          >
             <i class="bi bi-slash-circle-fill me-1"></i> Ngừng bán
           </span>
         </div>
@@ -88,7 +101,9 @@ const paging = reactive<PagingInfo>({
   hasNextPage: false,
 });
 
-const pagingFrom = computed(() => (paging.totalCount === 0 ? 0 : (paging.pageNumber - 1) * paging.pageSize + 1));
+const pagingFrom = computed(() =>
+  paging.totalCount === 0 ? 0 : (paging.pageNumber - 1) * paging.pageSize + 1,
+);
 const pagingTo = computed(() => Math.min(paging.pageNumber * paging.pageSize, paging.totalCount));
 
 const fetchData = async (page = 1) => {

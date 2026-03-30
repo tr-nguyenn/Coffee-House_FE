@@ -1,11 +1,7 @@
 <template>
   <div class="d-flex flex-column h-100 bg-white ms-3 border-start no-print">
-    <div
-      class="p-2 border-bottom bg-light flex-shrink-0 z-1 d-flex justify-content-center"
-    >
-      <div
-        class="custom-tab-container bg-white border shadow-sm p-1 rounded-pill d-inline-flex"
-      >
+    <div class="p-2 border-bottom bg-light flex-shrink-0 z-1 d-flex justify-content-center">
+      <div class="custom-tab-container bg-white border shadow-sm p-1 rounded-pill d-inline-flex">
         <button
           class="custom-tab-btn rounded-pill fw-semibold transition-all"
           :class="{active: activeTab === 'menu'}"
@@ -60,12 +56,15 @@
           @checkout="handleCheckout"
           @open-table="handleOpenTable"
           @print-provisional="handlePrintProvisional"
+          @add-customer="handleOpenCustomerModal"
         />
       </div>
     </div>
   </div>
 
   <PrintBill :order="orderToPrint" />
+
+  <CustomerModal ref="userModalRef" @saved="handleCustomerSaved" />
 </template>
 
 <script setup lang="ts">
@@ -73,6 +72,7 @@ import {ref, watch, nextTick} from "vue";
 import PrintBill from "../shared/PrintBill.vue";
 import PosMenu from "./PosMenu.vue";
 import PosCart from "./PosCart.vue";
+import CustomerModal from "@/components/admin/CustomerModal.vue";
 import {toast} from "@/utils/toast";
 import {orderService} from "@/services/OrderService";
 
@@ -93,6 +93,9 @@ const existingOrder = ref<any>(null);
 const selectedTableIdRef = ref<string | null>(null);
 const orderToPrint = ref<any>(null);
 
+// 👉 Khai báo biến Ref cho Modal Khách hàng
+const userModalRef = ref<any>(null);
+
 watch(
   () => props.selectedTable,
   async (newTable) => {
@@ -101,23 +104,41 @@ watch(
       selectedTableIdRef.value = newTable?.tableId || null;
     }
     existingOrder.value = null;
-    if (
-      newTable &&
-      newTable.isInUse &&
-      newTable.activeOrderId &&
-      newTable.tableId !== "TAKEAWAY"
-    ) {
+    if (newTable && newTable.isInUse && newTable.activeOrderId && newTable.tableId !== "TAKEAWAY") {
       try {
-        existingOrder.value = await orderService.getOrderById(
-          newTable.activeOrderId
-        );
+        existingOrder.value = await orderService.getOrderById(newTable.activeOrderId);
       } catch (err) {
         toast.error("Lỗi tải thông tin hóa đơn cũ!");
       }
     }
   },
-  {immediate: true}
+  {immediate: true},
 );
+
+// 👉 HÀM XỬ LÝ MỞ MODAL THÊM KHÁCH (Tự động điền dữ liệu)
+const handleOpenCustomerModal = (searchStr: string) => {
+  const prefillData: any = {};
+
+  if (searchStr) {
+    const trimmedStr = searchStr.trim();
+    // Regex check: Nếu chuỗi chỉ chứa số (có thể có dấu + đầu tiên) -> Là Số điện thoại
+    if (/^[\d+]+$/.test(trimmedStr)) {
+      prefillData.phoneNumber = trimmedStr;
+    }
+    // Còn lại thì mặc định gán vào Tên khách hàng
+    else {
+      prefillData.fullName = trimmedStr;
+    }
+  }
+
+  // Gọi hàm show của Modal và nhét data mồi vào
+  userModalRef.value?.show(prefillData);
+};
+
+// 👉 Xử lý sau khi lưu khách hàng thành công
+const handleCustomerSaved = () => {
+  toast.success("Thêm khách hàng thành công! Vui lòng gõ lại SĐT để chọn.");
+};
 
 const handleAddToCart = (product: any) => {
   const existing = cart.value.find((c) => c.productId === product.id);
@@ -138,8 +159,7 @@ const handleRemoveItem = (item: OrderDetailDto) => {
 };
 
 const handleSendToKitchen = async (payload?: any) => {
-  if (!props.selectedTable)
-    return toast.error("Vui lòng chọn bàn hoặc Khách mang đi!");
+  if (!props.selectedTable) return toast.error("Vui lòng chọn bàn hoặc Khách mang đi!");
   if (cart.value.length === 0) return;
   const itemsDto = cart.value.map((c) => ({
     productId: c.productId,
@@ -157,6 +177,7 @@ const handleSendToKitchen = async (payload?: any) => {
         customerName: payload?.customerName || null,
         customerPhone: payload?.customerPhone || null,
         note: "Takeaway",
+        pointsUsed: payload?.pointsUsed || 0, // 👉 Truyền số điểm đã xài xuống
       });
       toast.success("Thanh toán mang đi thành công! Đã báo bếp.");
     } else {
@@ -186,43 +207,30 @@ const handleOpenTable = async () => {
 };
 
 const getPaymentMethodName = (method: string) => {
-  const map: Record<string, string> = {
-    Cash: "Tiền mặt",
-    Banking: "Chuyển khoản / QR",
-    Card: "Thẻ / Ví",
-  };
+  const map: Record<string, string> = {Cash: "Tiền mặt", Banking: "Chuyển khoản / QR", Card: "Thẻ / Ví"};
   return map[method] || method || "Tiền mặt";
 };
 
-// 👉 CẬP NHẬT: THÊM nextTick CHO IN TẠM TÍNH
 const handlePrintProvisional = async () => {
   if (!existingOrder.value) return;
   orderToPrint.value = {...existingOrder.value, isProvisional: true};
-
-  await nextTick(); // Chờ VueJS cập nhật HTML
-
+  await nextTick();
   setTimeout(() => {
     window.print();
     orderToPrint.value = null;
   }, 100);
 };
 
-// 👉 CẬP NHẬT: THÊM nextTick CHO IN THANH TOÁN
 const handleCheckout = async (payload?: any) => {
   if (!existingOrder.value) return;
   const paymentMethod = payload?.paymentMethod || "Cash";
 
-  if (
-    confirm(
-      `Xác nhận thanh toán hóa đơn này bằng ${getPaymentMethodName(
-        paymentMethod
-      )}?`
-    )
-  ) {
+  if (confirm(`Xác nhận thanh toán hóa đơn này bằng ${getPaymentMethodName(paymentMethod)}?`)) {
     try {
       await orderService.checkoutOrder(existingOrder.value.id, {
         paymentMethod: paymentMethod,
         customerId: payload?.customerId || null,
+        pointsUsed: payload?.pointsUsed || 0,
       });
       toast.success("Thanh toán thành công!");
 
@@ -232,8 +240,7 @@ const handleCheckout = async (payload?: any) => {
         isProvisional: false,
       };
 
-      await nextTick(); // Chờ VueJS vẽ HTML
-
+      await nextTick();
       setTimeout(() => {
         window.print();
         emit("order-success", "checkout");
@@ -290,8 +297,6 @@ const handleCheckout = async (payload?: any) => {
   pointer-events: auto;
   transition: opacity 0.3s ease;
 }
-
-/* Ẩn khu vực in khi đang dùng bình thường */
 .print-only {
   display: none;
 }
@@ -299,24 +304,19 @@ const handleCheckout = async (payload?: any) => {
 
 <style>
 @media print {
-  /* Ẩn TOÀN BỘ layout web */
   body * {
     visibility: hidden;
   }
-
-  /* Bật hiển thị khu vực in */
   #print-bill-area,
   #print-bill-area * {
     visibility: visible;
   }
-
-  /* Ép khung Hóa đơn lên góc cùng màn hình (thoát khỏi rào cản của thẻ cha) */
   #print-bill-area {
     display: block !important;
     position: fixed !important;
     left: 0;
     top: 0;
-    width: 80mm !important; /* Size chuẩn máy in nhiệt K80 */
+    width: 80mm !important;
     margin: 0;
     padding: 0;
     color: #000 !important;
@@ -324,12 +324,9 @@ const handleCheckout = async (payload?: any) => {
     font-family: "Courier New", Courier, monospace;
     z-index: 99999;
   }
-
   .dashed-border {
     border-style: dashed !important;
   }
-
-  /* Gỡ bỏ các giới hạn chiều cao chống tràn để máy in không cắt giấy */
   html,
   body,
   #app,

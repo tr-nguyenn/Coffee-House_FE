@@ -35,9 +35,7 @@
       <div class="mb-4">
         <div
           class="card text-center cursor-pointer transition-all border-0 rounded-4 shadow-sm takeaway-card"
-          :class="{
-            'selected-takeaway transform-active': selectedTableId === 'TAKEAWAY',
-          }"
+          :class="{'selected-takeaway transform-active': selectedTableId === 'TAKEAWAY'}"
           @click="selectTakeaway"
         >
           <div
@@ -66,9 +64,7 @@
         <div v-for="(group, areaName) in filteredGroupedTables" :key="areaName" class="mb-5">
           <div class="d-flex align-items-center mb-3 ps-1">
             <div class="bg-primary rounded-pill me-2" style="width: 5px; height: 20px"></div>
-            <h6 class="fw-bolder text-dark mb-0">
-              {{ areaName }}
-            </h6>
+            <h6 class="fw-bolder text-dark mb-0">{{ areaName }}</h6>
             <span class="badge bg-white text-secondary ms-2 border shadow-sm">{{ group.length }} bàn</span>
           </div>
 
@@ -115,8 +111,7 @@
                     class="text-danger fw-bold mt-1"
                     style="font-size: 0.75rem"
                   >
-                    <i class="bi bi-clock-history"></i>
-                    {{ getElapsedTime(table.activeOrderTime) }}
+                    <i class="bi bi-clock-history"></i> {{ getElapsedTime(table.activeOrderTime) }}
                   </div>
                 </div>
               </div>
@@ -170,34 +165,61 @@ const getElapsedTime = (activeOrderTime?: string | Date) => {
   return `${mins} phút`;
 };
 
-const uniqueAreas = computed(() => {
-  const areas = tables.value.map((t) => t.areaName);
-  return [...new Set(areas)].sort();
-});
+// --- LOGIC XỬ LÝ SẮP XẾP ---
 
-const filteredGroupedTables = computed(() => {
-  const groups: Record<string, TableStatusDto[]> = {};
+// 1. Lấy danh sách tên Khu vực (Menu ngang) xếp theo AreaDisplayOrder
+const uniqueAreas = computed(() => {
+  const areaMap = new Map<string, number>();
 
   tables.value.forEach((t) => {
-    if (selectedArea.value === "All" || selectedArea.value === t.areaName) {
-      const area = t.areaName || "Khác";
-      if (!groups[area]) {
-        groups[area] = [];
-      }
-      groups[area]!.push(t);
+    const areaName = t.areaName || "Khác";
+    // Ánh xạ tên khu vực với AreaDisplayOrder nhỏ nhất
+    if (!areaMap.has(areaName)) {
+      areaMap.set(areaName, t.areaDisplayOrder ?? 9999);
+    } else {
+      areaMap.set(areaName, Math.min(areaMap.get(areaName)!, t.areaDisplayOrder ?? 9999));
     }
   });
 
+  // Chuyển thành Array, xếp theo số DisplayOrder, rồi bóc tên Khu vực ra
+  return Array.from(areaMap.entries())
+    .sort((a, b) => a[1] - b[1])
+    .map((entry) => entry[0]);
+});
+
+// 2. Nhóm bàn theo khu vực và Sắp xếp hiển thị bên dưới
+const filteredGroupedTables = computed(() => {
+  const groups: Record<string, TableStatusDto[]> = {};
+
+  // BƯỚC 1: Dựng sẵn các "căn phòng" theo ĐÚNG THỨ TỰ của Menu (uniqueAreas)
+  // Javascript sẽ in Object ra đúng theo thứ tự chúng ta tạo Key ở bước này.
+  uniqueAreas.value.forEach((area) => {
+    if (selectedArea.value === "All" || selectedArea.value === area) {
+      groups[area] = [];
+    }
+  });
+
+  // BƯỚC 2: Thả các bàn vào đúng "căn phòng" của nó
+  tables.value.forEach((t) => {
+    const areaName = t.areaName || "Khác";
+    if (groups[areaName]) {
+      groups[areaName].push(t);
+    }
+  });
+
+  // BƯỚC 3: Đi vào từng "căn phòng", xếp lại bàn ghế theo DisplayOrder
   for (const key in groups) {
     groups[key]!.sort((a, b) => {
-      const orderA = a.displayOrder !== undefined ? a.displayOrder : 9999;
-      const orderB = b.displayOrder !== undefined ? b.displayOrder : 9999;
+      const orderA = a.displayOrder ?? 9999;
+      const orderB = b.displayOrder ?? 9999;
       return orderA - orderB;
     });
   }
 
   return groups;
 });
+
+// --- LOGIC API & SỰ KIỆN ---
 
 const fetchTables = async () => {
   loading.value = true;

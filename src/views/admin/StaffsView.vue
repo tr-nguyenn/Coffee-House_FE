@@ -16,7 +16,7 @@
       @delete="handleDelete"
     >
       <template #col-fullName="{item}">
-        <span class="text-warning fw-semibold">{{ item.fullName }}</span>
+        <span class="fw-semibold">{{ item.fullName }}</span>
       </template>
       <template #col-email="{item}">
         <span>{{ item.email }}</span>
@@ -24,10 +24,19 @@
       <template #col-phoneNumber="{item}">
         <span>{{ item.phoneNumber }}</span>
       </template>
+
       <template #col-roles="{item}">
-        <span class="badge me-1 mb-1" :class="getRoleBadgeClass(role)" v-for="role in item.roles" :key="role">
-          {{ role }}
-        </span>
+        <div class="d-flex justify-content-center flex-wrap">
+          <span
+            class="role-badge me-1 mb-1"
+            :class="getRoleBadgeClass(role)"
+            v-for="role in Array.isArray(item.roles) ? item.roles : [item.roles]"
+            :key="role"
+          >
+            <i class="bi me-1" :class="getRoleIcon(role)"></i>
+            {{ formatRoleName(role) }}
+          </span>
+        </div>
       </template>
     </BaseTable>
 
@@ -57,8 +66,8 @@ import {toast} from "@/utils/toast";
 import {confirmDelete} from "@/utils/swal";
 
 const staffCols: TableColumn[] = [
-  {label: "Tên nhân viên", key: "fullName", width: "25%"},
-  {label: "Email", key: "email", width: "25%"},
+  {label: "Tên nhân viên", key: "fullName"},
+  {label: "Email", key: "email"},
   {label: "Số điện thoại", key: "phoneNumber"},
   {label: "Quyền", key: "roles"},
 ];
@@ -76,16 +85,41 @@ const paging = reactive<PagingInfo>({
   hasPreviousPage: false,
   hasNextPage: false,
 });
+
 const pagingFrom = computed(() =>
   paging.totalCount === 0 ? 0 : (paging.pageNumber - 1) * paging.pageSize + 1,
 );
+
 const pagingTo = computed(() => Math.min(paging.pageNumber * paging.pageSize, paging.totalCount));
 
 const getRoleBadgeClass = (role: string) => {
-  return role === "Admin" ? "bg-danger text-light" : "bg-primary text-light";
+  const map: Record<string, string> = {
+    Admin: "role-admin",
+    Staff: "role-staff",
+    Kitchen: "role-kitchen",
+  };
+  return map[role] || "role-default";
 };
 
-// 4. Các hàm xử lý dữ liệu
+const getRoleIcon = (role: string) => {
+  const map: Record<string, string> = {
+    Admin: "bi-shield-fill-check",
+    Staff: "bi-person-badge-fill",
+    Kitchen: "bi-fire",
+  };
+  return map[role] || "bi-person-fill";
+};
+
+const formatRoleName = (role: string) => {
+  if (!role) return "Chưa cấp quyền";
+  const map: Record<string, string> = {
+    Admin: "Quản trị viên",
+    Staff: "Nhân viên",
+    Kitchen: "Bếp",
+  };
+  return map[role] || role;
+};
+
 const fetchData = async (page = 1) => {
   loading.value = true;
   paging.pageNumber = page;
@@ -107,7 +141,6 @@ const fetchData = async (page = 1) => {
   }
 };
 
-// 5. Xử lý sự kiện từ UI
 let searchTimeout: ReturnType<typeof setTimeout>;
 const onSearch = (value: string) => {
   clearTimeout(searchTimeout);
@@ -145,10 +178,40 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.badge {
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-weight: 500;
-  font-size: 0.85rem;
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 14px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.2px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.role-admin {
+  background-color: #fff1f2;
+  color: #e11d48;
+  border-color: #fecdd3;
+}
+
+.role-staff {
+  background-color: #eff6ff;
+  color: #2563eb;
+  border-color: #bfdbfe;
+}
+
+.role-kitchen {
+  background-color: #fffbeb;
+  color: #d97706;
+  border-color: #fde68a;
+}
+
+.role-default {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border-color: #e5e7eb;
 }
 </style>

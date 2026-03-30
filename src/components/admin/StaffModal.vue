@@ -6,7 +6,7 @@
     @save="handleSave"
   >
     <div class="staff-form">
-      <!-- Email (readonly if editing as username cannot be changed typically, or handled via update) -->
+      <!-- Email -->
       <div class="mb-4">
         <label class="form-label-custom">EMAIL <span class="text-danger">*</span></label>
         <input
@@ -14,13 +14,13 @@
           type="email"
           class="form-control premium-input"
           placeholder="VD: nv1@coffee.com..."
-          :class="{ 'is-invalid': errors.email }"
+          :class="{'is-invalid': errors.email}"
           :disabled="isEdit"
         />
         <div class="invalid-feedback" v-if="errors.email">{{ errors.email }}</div>
       </div>
 
-      <!-- Mật khẩu (Chỉ bắt buộc khi thêm mới) -->
+      <!-- Mật khẩu -->
       <div class="mb-4" v-if="!isEdit">
         <label class="form-label-custom">MẬT KHẨU <span class="text-danger">*</span></label>
         <input
@@ -28,7 +28,7 @@
           type="password"
           class="form-control premium-input"
           placeholder="Nhập mật khẩu..."
-          :class="{ 'is-invalid': errors.password }"
+          :class="{'is-invalid': errors.password}"
         />
         <div class="invalid-feedback" v-if="errors.password">{{ errors.password }}</div>
       </div>
@@ -41,7 +41,7 @@
           type="text"
           class="form-control premium-input"
           placeholder="VD: Nguyễn Văn A..."
-          :class="{ 'is-invalid': errors.fullName }"
+          :class="{'is-invalid': errors.fullName}"
         />
         <div class="invalid-feedback" v-if="errors.fullName">{{ errors.fullName }}</div>
       </div>
@@ -54,7 +54,7 @@
           type="text"
           class="form-control premium-input"
           placeholder="VD: 0912345678..."
-          :class="{ 'is-invalid': errors.phoneNumber }"
+          :class="{'is-invalid': errors.phoneNumber}"
         />
         <div class="invalid-feedback" v-if="errors.phoneNumber">{{ errors.phoneNumber }}</div>
       </div>
@@ -62,11 +62,7 @@
       <!-- Quyền / Role -->
       <div class="mb-2">
         <label class="form-label-custom">QUYỀN (ROLE) <span class="text-danger">*</span></label>
-        <select
-          v-model="form.role"
-          class="form-select premium-input"
-          :class="{ 'is-invalid': errors.role }"
-        >
+        <select v-model="form.role" class="form-select premium-input" :class="{'is-invalid': errors.role}">
           <option value="" disabled>-- Chọn quyền --</option>
           <option value="Admin">Admin</option>
           <option value="Staff">Nhân viên (Staff)</option>
@@ -79,18 +75,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import {ref, reactive} from "vue";
 import BaseModal from "./shared/BaseModal.vue";
-import { staffService } from "@/services/StaffService";
-import type { Staff } from "@/models/Staff";
-import { toast } from "@/utils/toast";
+import {staffService} from "@/services/StaffService";
+import type {Staff} from "@/models/Staff";
+import {toast} from "@/utils/toast";
 
 const emit = defineEmits(["saved"]);
 
 const baseModalRef = ref();
 const isEdit = ref(false);
 const submitting = ref(false);
-const errors = reactive({ email: "", password: "", fullName: "", phoneNumber: "", role: "" });
+const errors = reactive({email: "", password: "", fullName: "", phoneNumber: "", role: ""});
 
 const form = reactive<Staff>({
   id: undefined,
@@ -111,7 +107,7 @@ const show = (item?: Staff) => {
 
   if (item) {
     isEdit.value = true;
-    Object.assign(form, { ...item });
+    Object.assign(form, {...item});
     // Assuming the API returns a list of roles, use the first one for the dropdown
     form.role = item.roles && item.roles.length > 0 ? item.roles[0] : "Staff";
   } else {
@@ -187,7 +183,7 @@ const handleSave = async () => {
   }
 };
 
-defineExpose({ show });
+defineExpose({show});
 </script>
 
 <style scoped>
@@ -216,7 +212,7 @@ defineExpose({ show });
 
 .premium-input:focus {
   background-color: #ffffff !important;
-  border-color: #4F46E5 !important;
+  border-color: #4f46e5 !important;
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12) !important;
   outline: none;
 }
