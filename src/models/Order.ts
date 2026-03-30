@@ -41,4 +41,5 @@ export interface CheckoutOrderDto {
   customerId?: string | null;
   customerName?: string | null;
   customerPhone?: string | null;
+  pointsUsed?: number;
 }
