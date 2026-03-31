@@ -50,7 +50,8 @@
         <div class="col" v-for="product in filteredProducts" :key="'grid-' + product.id">
           <div
             class="card h-100 shadow-sm border-0 product-card cursor-pointer rounded-3 overflow-hidden mx-2"
-            @click="emit('add-to-cart', product)"
+            :class="{ 'opacity-50 user-select-none': !product.isAvailable }"
+            @click="handleAddToCart(product)"
           >
             <div
               class="ratio ratio-1x1 bg-dark text-white d-flex justify-content-center align-items-center position-relative"
@@ -62,7 +63,12 @@
               />
               <i v-else class="bi bi-cup-hot-fill display-5 opacity-50 m-auto"></i>
 
+              <div v-if="!product.isAvailable" class="position-absolute top-0 end-0 p-1 z-3">
+                <span class="badge bg-danger" style="font-size: 0.65rem">Hết hàng</span>
+              </div>
+
               <div
+                v-if="product.isAvailable"
                 class="overlay d-flex align-items-center justify-content-center position-absolute w-100 h-100 top-0 start-0 transition-all text-white"
               >
                 <i class="bi bi-plus-circle-fill display-5"></i>
@@ -82,7 +88,8 @@
         <div class="col" v-for="product in filteredProducts" :key="'list-' + product.id">
           <div
             class="card h-100 shadow-sm border-0 product-compact-card cursor-pointer rounded-3"
-            @click="emit('add-to-cart', product)"
+            :class="{ 'opacity-50 user-select-none': !product.isAvailable }"
+            @click="handleAddToCart(product)"
           >
             <div class="card-body p-2 d-flex align-items-center gap-2">
               <img
@@ -100,19 +107,22 @@
               </div>
 
               <div class="flex-grow-1 min-w-0 text-start d-flex flex-column justify-content-center">
-                <h6
-                  class="mb-0 text-dark fw-bold text-truncate"
-                  style="font-size: 0.85rem"
-                  :title="product.name"
-                >
-                  {{ product.name }}
-                </h6>
+                <div class="d-flex align-items-center gap-1">
+                  <h6
+                    class="mb-0 text-dark fw-bold text-truncate"
+                    style="font-size: 0.85rem"
+                    :title="product.name"
+                  >
+                    {{ product.name }}
+                  </h6>
+                  <span v-if="!product.isAvailable" class="badge bg-danger px-1" style="font-size: 0.6rem">Hết</span>
+                </div>
                 <span class="text-primary fw-bolder mt-1" style="font-size: 0.85rem">
                   {{ formatVND(product.price) }}
                 </span>
               </div>
 
-              <div class="ms-auto pe-1 text-primary opacity-50 add-icon transition-all">
+              <div v-if="product.isAvailable" class="ms-auto pe-1 text-primary opacity-50 add-icon transition-all">
                 <i class="bi bi-plus-circle-fill fs-5"></i>
               </div>
             </div>
@@ -221,6 +231,14 @@ const getImageUrl = (url?: string) => {
   if (url.startsWith("http")) return url;
   const baseUrl = import.meta.env.VITE_API_BASE_URL || "";
   return `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
+};
+
+const handleAddToCart = (product: Product) => {
+  if (!product.isAvailable) {
+    toast.warning("Món này hiện đang hết hàng!");
+    return;
+  }
+  emit('add-to-cart', product);
 };
 
 const uniqueCategories = computed(() => {

@@ -211,9 +211,16 @@ const getPaymentMethodName = (method: string) => {
   return map[method] || method || "Tiền mặt";
 };
 
-const handlePrintProvisional = async () => {
+const handlePrintProvisional = async (payload?: any) => {
   if (!existingOrder.value) return;
-  orderToPrint.value = {...existingOrder.value, isProvisional: true};
+  orderToPrint.value = {
+    ...existingOrder.value,
+    isProvisional: true,
+    customerName: payload?.customerName || existingOrder.value.customerName,
+    discountAmount: payload?.discountAmount || existingOrder.value.discountAmount || 0,
+    finalAmount: payload?.finalAmount || existingOrder.value.finalAmount,
+    totalAmount: payload?.totalAmount || existingOrder.value.totalAmount,
+  };
   await nextTick();
   setTimeout(() => {
     window.print();
@@ -238,6 +245,10 @@ const handleCheckout = async (payload?: any) => {
         ...existingOrder.value,
         paymentMethod: paymentMethod,
         isProvisional: false,
+        customerName: payload?.customerName || existingOrder.value.customerName,
+        discountAmount: payload?.discountAmount || existingOrder.value.discountAmount || 0,
+        finalAmount: payload?.finalAmount || existingOrder.value.finalAmount,
+        totalAmount: payload?.totalAmount || existingOrder.value.totalAmount,
       };
 
       await nextTick();
@@ -299,43 +310,5 @@ const handleCheckout = async (payload?: any) => {
 }
 .print-only {
   display: none;
-}
-</style>
-
-<style>
-@media print {
-  body * {
-    visibility: hidden;
-  }
-  #print-bill-area,
-  #print-bill-area * {
-    visibility: visible;
-  }
-  #print-bill-area {
-    display: block !important;
-    position: fixed !important;
-    left: 0;
-    top: 0;
-    width: 80mm !important;
-    margin: 0;
-    padding: 0;
-    color: #000 !important;
-    background: #fff !important;
-    font-family: "Courier New", Courier, monospace;
-    z-index: 99999;
-  }
-  .dashed-border {
-    border-style: dashed !important;
-  }
-  html,
-  body,
-  #app,
-  .admin-layout,
-  .main-wrapper,
-  .pos-layout {
-    height: auto !important;
-    overflow: visible !important;
-    background-color: white !important;
-  }
 }
 </style>

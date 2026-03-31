@@ -247,7 +247,7 @@
               <template v-if="existingOrder && cart.length === 0">
                 <button
                   class="btn btn-info btn-sm text-white fw-bold shadow-sm px-5"
-                  @click="emit('print-provisional')"
+                  @click="emit('print-provisional', getCheckoutPayload())"
                   title="In Tạm Tính"
                 >
                   <i class="bi bi-printer-fill"></i>
@@ -255,7 +255,7 @@
                 </button>
                 <button
                   class="btn btn-success btn-sm flex-grow-1 fw-bold shadow-sm"
-                  @click="emit('print-provisional', getCheckoutPayload())"
+                  @click="emit('checkout', getCheckoutPayload())"
                 >
                   THANH TOÁN
                 </button>

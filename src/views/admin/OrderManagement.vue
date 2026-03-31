@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex h-100 bg-light">
+  <div class="d-flex h-100 bg-light no-print">
     <OrderFilterSidebar @apply-filter="handleApplyFilter" />
 
     <div class="flex-grow-1 d-flex flex-column overflow-hidden p-2">
@@ -25,9 +25,8 @@
         />
       </div>
     </div>
-
-    <PrintBill :order="billToReprint" />
   </div>
+  <PrintBill :order="billToReprint" />
 </template>
 
 <script setup lang="ts">

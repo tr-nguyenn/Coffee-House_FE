@@ -14,7 +14,7 @@
           <tr>
             <th class="ps-3" style="width: 120px">Mã HĐ</th>
             <th>Thời gian</th>
-            <th>Bàn / Khu vực</th>
+            <th>Bàn</th>
             <th>Khách hàng</th>
             <th class="text-end">Tổng gốc</th>
             <th class="text-end">Giảm giá</th>

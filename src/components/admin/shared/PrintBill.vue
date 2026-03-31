@@ -118,6 +118,9 @@ const getPaymentMethodName = (method: string) => {
 <style>
 /* CSS DÀNH RIÊNG CHO MÁY IN KHÔNG ĐƯỢC SCOPED */
 @media print {
+  .no-print {
+    display: none !important;
+  }
   body * {
     visibility: hidden;
   }
@@ -128,7 +131,7 @@ const getPaymentMethodName = (method: string) => {
 
   #print-bill-area {
     display: block !important;
-    position: fixed !important;
+    position: absolute !important;
     left: 0;
     top: 0;
     width: 80mm !important;
