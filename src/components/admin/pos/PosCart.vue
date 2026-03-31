@@ -89,10 +89,29 @@
             ></span>
             <input
               type="text"
-              class="form-control border-start-0 ps-1"
+              class="form-control border-start-0 border-end-0 ps-1"
               placeholder="Mã Voucher..."
               v-model="voucherCode"
+              :disabled="!!appliedVoucher"
             />
+            <button
+              v-if="!appliedVoucher"
+              class="btn btn-outline-primary px-2"
+              type="button"
+              @click="applyVoucher"
+              :disabled="!voucherCode.trim() || isApplyingVoucher"
+            >
+              <i v-if="isApplyingVoucher" class="spinner-border spinner-border-sm"></i>
+              <i v-else class="bi bi-check2-circle"></i>
+            </button>
+            <button
+              v-else
+              class="btn btn-outline-danger px-2"
+              type="button"
+              @click="removeVoucher"
+            >
+              <i class="bi bi-x-circle"></i>
+            </button>
           </div>
         </div>
 
@@ -110,6 +129,23 @@
             Dùng tối đa <span class="text-warning fw-bold">{{ pointsToUse }} điểm</span> để giảm
             <span class="text-danger fw-bold">{{ formatVND(pointsDiscountAmount) }}</span>
           </label>
+        </div>
+
+        <!-- Hiển thị Voucher đã áp dụng -->
+        <div
+          v-if="appliedVoucher"
+          class="d-flex justify-content-between align-items-center px-2 py-1 mt-1 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded"
+        >
+          <div class="d-flex align-items-center min-w-0">
+            <i class="bi bi-ticket-perforated-fill text-primary me-2"></i>
+            <span class="fw-bold text-dark small text-truncate">{{ appliedVoucher.code }}</span>
+            <span class="badge bg-primary ms-2 flex-shrink-0">
+              {{ appliedVoucher.discountType === 'Percentage'
+                ? `-${appliedVoucher.discountValue}%`
+                : `-${formatVND(appliedVoucher.discountValue)}` }}
+            </span>
+          </div>
+          <span class="text-danger fw-bold small flex-shrink-0">-{{ formatVND(voucherDiscountAmount) }}</span>
         </div>
       </div>
     </div>
@@ -199,7 +235,7 @@
     <div class="flex-shrink-0 bg-white shadow-lg p-2 z-3 border-top">
       <div
         class="d-flex justify-content-between align-items-center mb-1 px-1"
-        v-if="pointsDiscountAmount > 0"
+        v-if="pointsDiscountAmount > 0 || voucherDiscountAmount > 0"
       >
         <span class="text-muted small">Tổng phụ</span>
         <span class="fw-semibold">{{ formatVND(subTotalAmount) }}</span>
@@ -210,6 +246,13 @@
       >
         <span class="text-muted small">Trừ điểm</span>
         <span class="fw-semibold text-success">- {{ formatVND(pointsDiscountAmount) }}</span>
+      </div>
+      <div
+        class="d-flex justify-content-between align-items-center mb-1 px-1"
+        v-if="voucherDiscountAmount > 0"
+      >
+        <span class="text-muted small">Voucher <span class="badge bg-primary bg-opacity-75 ms-1">{{ appliedVoucher?.code }}</span></span>
+        <span class="fw-semibold text-success">- {{ formatVND(voucherDiscountAmount) }}</span>
       </div>
       <div class="d-flex justify-content-between align-items-center mb-2 px-1 border-top pt-1">
         <span class="fw-bold text-dark small">KHÁCH CẦN TRẢ</span>
@@ -293,6 +336,9 @@ import {ref, computed, watch} from "vue";
 import {formatVND} from "@/utils/helpers";
 import type {OrderDetailDto} from "./OperationsArea.vue";
 import {userService} from "@/services/CustomerService";
+import {voucherService} from "@/services/VoucherService";
+import type {VoucherDto} from "@/services/VoucherService";
+import {toast} from "@/utils/toast";
 
 const props = defineProps<{
   selectedTable: any;
@@ -348,15 +394,59 @@ const pointsToUse = computed(() => {
   return Math.min(selectedCustomer.value.rewardPoints, maxPointsByBill);
 });
 
-// Tiền được giảm
+// Tiền được giảm (từ điểm)
 const pointsDiscountAmount = computed(() => {
   return pointsToUse.value * DISCOUNT_PER_POINT;
 });
 
-// Khách cần trả cuối cùng
-const finalTotalAmount = computed(() => {
-  return subTotalAmount.value - pointsDiscountAmount.value;
+// ========== VOUCHER ==========
+const appliedVoucher = ref<VoucherDto | null>(null);
+const isApplyingVoucher = ref(false);
+
+// Tính tiền giảm từ voucher
+const voucherDiscountAmount = computed(() => {
+  if (!appliedVoucher.value) return 0;
+  const afterPointsDiscount = subTotalAmount.value - pointsDiscountAmount.value;
+  if (afterPointsDiscount <= 0) return 0;
+
+  if (appliedVoucher.value.discountType === 'FixedAmount') {
+    return Math.min(appliedVoucher.value.discountValue, afterPointsDiscount);
+  } else {
+    // Percentage
+    let discount = afterPointsDiscount * appliedVoucher.value.discountValue / 100;
+    if (appliedVoucher.value.maxDiscountAmount && discount > appliedVoucher.value.maxDiscountAmount) {
+      discount = appliedVoucher.value.maxDiscountAmount;
+    }
+    return Math.min(discount, afterPointsDiscount);
+  }
 });
+
+// Khách cần trả cuối cùng (trừ cả điểm + voucher)
+const finalTotalAmount = computed(() => {
+  const result = subTotalAmount.value - pointsDiscountAmount.value - voucherDiscountAmount.value;
+  return result < 0 ? 0 : result;
+});
+
+const applyVoucher = async () => {
+  if (!voucherCode.value.trim()) return;
+  isApplyingVoucher.value = true;
+  try {
+    const result = await voucherService.validate(voucherCode.value.trim().toUpperCase(), subTotalAmount.value);
+    appliedVoucher.value = result.data;
+    toast.success(`Áp dụng mã ${appliedVoucher.value!.code} thành công!`);
+  } catch (error: any) {
+    const msg = error.response?.data?.message || 'Mã giảm giá không hợp lệ';
+    toast.error(msg);
+    appliedVoucher.value = null;
+  } finally {
+    isApplyingVoucher.value = false;
+  }
+};
+
+const removeVoucher = () => {
+  appliedVoucher.value = null;
+  voucherCode.value = '';
+};
 
 const handleSearch = () => {
   showDropdown.value = true;
@@ -410,10 +500,10 @@ const getCheckoutPayload = () => ({
   customerName: selectedCustomer.value?.fullName || searchQuery.value,
   customerPhone: selectedCustomer.value?.phoneNumber || null,
   pointsUsed: pointsToUse.value,
-  discountAmount: pointsDiscountAmount.value,
+  discountAmount: pointsDiscountAmount.value + voucherDiscountAmount.value,
   finalAmount: finalTotalAmount.value,
   totalAmount: subTotalAmount.value,
-  voucherId: null,
+  voucherId: appliedVoucher.value?.id || null,
 });
 </script>
 

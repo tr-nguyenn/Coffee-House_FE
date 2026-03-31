@@ -15,7 +15,7 @@ export interface KitchenTicketDto {
 
 export interface CreateOrderDto {
   tableId?: string | null;
-  userId?: string | null;
+  customerId?: string | null;
   note?: string | null;
   paymentMethod: string;
   items: OrderItemDto[];
@@ -42,4 +42,5 @@ export interface CheckoutOrderDto {
   customerName?: string | null;
   customerPhone?: string | null;
   pointsUsed?: number;
+  voucherId?: string | null;
 }

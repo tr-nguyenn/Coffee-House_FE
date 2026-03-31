@@ -173,11 +173,12 @@ const handleSendToKitchen = async (payload?: any) => {
         tableId: null,
         items: itemsDto,
         paymentMethod: payload?.paymentMethod || "Cash",
-        userId: payload?.customerId || null,
+        customerId: payload?.customerId || null,
         customerName: payload?.customerName || null,
         customerPhone: payload?.customerPhone || null,
         note: "Takeaway",
         pointsUsed: payload?.pointsUsed || 0, // 👉 Truyền số điểm đã xài xuống
+        voucherId: payload?.voucherId || null,
       });
       toast.success("Thanh toán mang đi thành công! Đã báo bếp.");
     } else {
@@ -217,9 +218,9 @@ const handlePrintProvisional = async (payload?: any) => {
     ...existingOrder.value,
     isProvisional: true,
     customerName: payload?.customerName || existingOrder.value.customerName,
-    discountAmount: payload?.discountAmount || existingOrder.value.discountAmount || 0,
-    finalAmount: payload?.finalAmount || existingOrder.value.finalAmount,
-    totalAmount: payload?.totalAmount || existingOrder.value.totalAmount,
+    discountAmount: payload?.discountAmount ?? existingOrder.value.discountAmount ?? 0,
+    finalAmount: payload?.finalAmount ?? existingOrder.value.finalAmount,
+    totalAmount: payload?.totalAmount ?? existingOrder.value.totalAmount,
   };
   await nextTick();
   setTimeout(() => {
@@ -238,6 +239,7 @@ const handleCheckout = async (payload?: any) => {
         paymentMethod: paymentMethod,
         customerId: payload?.customerId || null,
         pointsUsed: payload?.pointsUsed || 0,
+        voucherId: payload?.voucherId || null,
       });
       toast.success("Thanh toán thành công!");
 
@@ -246,9 +248,9 @@ const handleCheckout = async (payload?: any) => {
         paymentMethod: paymentMethod,
         isProvisional: false,
         customerName: payload?.customerName || existingOrder.value.customerName,
-        discountAmount: payload?.discountAmount || existingOrder.value.discountAmount || 0,
-        finalAmount: payload?.finalAmount || existingOrder.value.finalAmount,
-        totalAmount: payload?.totalAmount || existingOrder.value.totalAmount,
+        discountAmount: payload?.discountAmount ?? existingOrder.value.discountAmount ?? 0,
+        finalAmount: payload?.finalAmount ?? existingOrder.value.finalAmount,
+        totalAmount: payload?.totalAmount ?? existingOrder.value.totalAmount,
       };
 
       await nextTick();

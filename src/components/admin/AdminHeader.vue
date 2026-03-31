@@ -107,6 +107,9 @@
               <router-link to="/admin/invoices" class="dropdown-item" @click="openDropdown = null">
                 <i class="bi bi-receipt text-success"></i> Đơn hàng
               </router-link>
+              <router-link to="/admin/vouchers" class="dropdown-item" @click="openDropdown = null">
+                <i class="bi bi-ticket-perforated text-warning"></i> Voucher
+              </router-link>
               <router-link to="/admin/kitchen" class="dropdown-item" @click="openDropdown = null">
                 <i class="bi bi-display text-danger"></i> Màn hình bếp
               </router-link>
@@ -244,6 +247,9 @@
       <router-link to="/admin/tables" class="mobile-item" @click="showMobileMenu = false"
         ><i class="bi bi-table"></i> Bàn & Sơ đồ</router-link
       >
+      <router-link to="/admin/vouchers" class="mobile-item" @click="showMobileMenu = false"
+        ><i class="bi bi-ticket-perforated"></i> Voucher</router-link
+      >
     </div>
   </transition>
 </template>
@@ -328,7 +334,7 @@ const isAccountActive = computed(() => {
 });
 
 const isSystemActive = computed(() => {
-  return ["admin-areas", "admin-tables"].includes(route.name as string);
+  return ["admin-areas", "admin-tables", "admin-vouchers"].includes(route.name as string);
 });
 </script>
 

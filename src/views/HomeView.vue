@@ -2,37 +2,10 @@
 import {ref, reactive, onMounted, computed} from "vue";
 import ProductCard from "@/components/ProductCard.vue";
 import HomeHero from "@/components/HomeHero.vue";
-import VoucherCard from "@/components/VoucherCard.vue";
+import HomePromotions from "@/components/HomePromotions.vue";
 import type {Product} from "@/models/Product";
 import type {PagingInfo} from "@/types";
 import {productService} from "@/services/ProductService";
-
-const promotions = ref([
-  {
-    id: 1,
-    title: "Giảm 20% Đơn Đầu Tiên",
-    description: "Áp dụng cho khách hàng mới khi mua các sản phẩm Cà phê truyền thống.",
-    code: "NEW20",
-    discount: "20%",
-    validUntil: "30/11/2026",
-  },
-  {
-    id: 2,
-    title: "Mua 2 Tặng 1",
-    description: "Khi mua 2 ly Trà trái cây bất kỳ, tặng ngay 1 ly cỡ nhỏ.",
-    code: "B2G1FREE",
-    discount: "100% Ly 3",
-    validUntil: "15/12/2026",
-  },
-  {
-    id: 3,
-    title: "Flash Sale Cuối Tuần",
-    description: "Giảm giá cực sốc vào thứ Bảy và Chủ Nhật cho toàn bộ sản phẩm đá xay.",
-    code: "WEEKEND50",
-    discount: "50K",
-    validUntil: "Mỗi cuối tuần",
-  },
-]);
 
 const products = ref<Product[]>([]);
 const loading = ref(false);
@@ -105,27 +78,8 @@ const displayedPages = computed(() => {
   <div class="home bg-dark" style="min-height: 100vh">
     <HomeHero />
 
-    <!-- Khuyến mãi Section -->
-    <section class="promotions py-5 bg-dark border-bottom border-secondary border-opacity-25">
-      <div class="container py-3">
-        <div class="d-flex align-items-center mb-4">
-          <i class="bi bi-gift-fill text-warning fs-3 me-3"></i>
-          <h3 class="fw-bold text-white mb-0">Khuyến mãi & Ưu đãi đặc biệt</h3>
-        </div>
-
-        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-          <div class="col" v-for="promo in promotions" :key="promo.id">
-            <VoucherCard
-              :title="promo.title"
-              :description="promo.description"
-              :code="promo.code"
-              :discount="promo.discount"
-              :valid-until="promo.validUntil"
-            />
-          </div>
-        </div>
-      </div>
-    </section>
+    <!-- Khuyến mãi Section (Dynamic Component) -->
+    <HomePromotions />
 
     <!-- Sản phẩm nổi bật Section -->
     <section class="featured-products py-4 bg-dark text-light">
