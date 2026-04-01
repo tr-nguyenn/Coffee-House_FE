@@ -73,16 +73,18 @@
               <div
                 class="card h-100 text-center cursor-pointer transition-all border-2 rounded-4 select-none table-card position-relative overflow-hidden"
                 :class="[
+                  table.isInUse && table.paymentMethod === 'Banking' ? 'card-processing' : 
                   table.isInUse ? 'card-occupied' : 'card-empty',
                   selectedTableId === table.tableId ? 'selected-table transform-active' : 'shadow-sm',
                 ]"
                 @click="onSelect(table)"
               >
                 <div class="position-absolute top-0 end-0 mt-2 me-2">
-                  <i
-                    class="bi fs-6"
-                    :class="table.isInUse ? 'bi-cup-hot-fill text-danger' : 'bi-check2-circle text-success'"
-                  ></i>
+                  <i class="bi fs-6" :class="{
+                    'bi-qr-code text-warning': table.isInUse && table.paymentMethod === 'Banking',
+                    'bi-cup-hot-fill text-danger': table.isInUse && table.paymentMethod !== 'Banking',
+                    'bi-check2-circle text-success': !table.isInUse
+                  }"></i>
                 </div>
 
                 <div class="card-body p-2 d-flex flex-column justify-content-center align-items-center">
@@ -96,14 +98,14 @@
 
                   <span
                     class="badge rounded-pill mb-1 px-2 py-1"
-                    :class="
-                      table.isInUse
-                        ? 'bg-danger bg-opacity-10 text-danger'
-                        : 'bg-success bg-opacity-10 text-success'
-                    "
+                    :class="{
+                      'bg-warning bg-opacity-10 text-warning': table.isInUse && table.paymentMethod === 'Banking',
+                      'bg-danger bg-opacity-10 text-danger': table.isInUse && table.paymentMethod !== 'Banking',
+                      'bg-success bg-opacity-10 text-success': !table.isInUse
+                    }"
                     style="font-size: 0.7rem; font-weight: 700"
                   >
-                    {{ table.isInUse ? "Có Khách" : "Trống" }}
+                    {{ table.isInUse && table.paymentMethod === 'Banking' ? 'Chờ thanh toán' : (table.isInUse ? "Có Khách" : "Trống") }}
                   </span>
 
                   <div
@@ -290,6 +292,15 @@ defineExpose({fetchTables, tables});
 }
 .card-occupied:hover {
   background-color: #fee2e2;
+  transform: translateY(-2px);
+}
+
+.card-processing {
+  border-color: #fde047 !important;
+  background-color: #fefce8;
+}
+.card-processing:hover {
+  background-color: #fef9c3;
   transform: translateY(-2px);
 }
 

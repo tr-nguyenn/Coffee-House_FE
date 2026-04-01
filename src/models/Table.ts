@@ -20,4 +20,5 @@ export interface TableStatusDto {
   activeOrderTime: Date;
   displayOrder: number;
   areaDisplayOrder: number;
+  paymentMethod?: string;
 }

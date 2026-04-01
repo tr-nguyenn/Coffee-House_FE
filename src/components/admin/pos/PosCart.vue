@@ -287,20 +287,38 @@
             </button>
 
             <template v-if="existingOrder && cart.length === 0">
-              <button
-                class="btn btn-info btn-sm text-white fw-bold shadow-sm px-5"
-                @click="emit('print-provisional', getCheckoutPayload())"
-                title="In Tạm Tính"
-              >
-                <i class="bi bi-printer-fill"></i>
-                IN TẠM PHIẾU TÍNH
-              </button>
-              <button
-                class="btn btn-success btn-sm flex-grow-1 fw-bold shadow-sm"
-                @click="emit('checkout', getCheckoutPayload())"
-              >
-                THANH TOÁN
-              </button>
+              <template v-if="existingOrder.paymentMethod === 'Banking'">
+                <button
+                  class="btn btn-info btn-sm text-white fw-bold shadow-sm px-2 flex-grow-1"
+                  @click="emit('print-provisional', getCheckoutPayload())"
+                  title="In lại QR"
+                >
+                  <i class="bi bi-printer-fill"></i> IN LẠI QR
+                </button>
+                <button
+                  class="btn btn-warning btn-sm fw-bold shadow-sm px-2 flex-grow-1 text-dark"
+                  @click="emit('show-qr-modal')"
+                  title="Đẩy lại ra Màn phụ"
+                >
+                  <i class="bi bi-display"></i> HIỆN LÊN MÀN HÌNH
+                </button>
+              </template>
+              <template v-else>
+                <button
+                  class="btn btn-info btn-sm text-white fw-bold shadow-sm px-5"
+                  @click="emit('print-provisional', getCheckoutPayload())"
+                  title="In Tạm Tính"
+                >
+                  <i class="bi bi-printer-fill"></i>
+                  IN TẠM PHIẾU TÍNH
+                </button>
+                <button
+                  class="btn btn-success btn-sm flex-grow-1 fw-bold shadow-sm"
+                  @click="emit('checkout', getCheckoutPayload())"
+                >
+                  THANH TOÁN
+                </button>
+              </template>
             </template>
           </div>
         </template>
@@ -332,6 +350,7 @@ const emit = defineEmits([
   "change-table",
   "print-provisional",
   "add-customer",
+  "show-qr-modal"
 ]);
 
 const existingItems = computed(() => props.existingOrder?.orderDetails || []);

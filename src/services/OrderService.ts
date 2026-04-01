@@ -28,6 +28,13 @@ class OrderService {
     return response.data;
   }
 
+  async updatePaymentMethod(orderId: string, paymentMethod: string): Promise<any> {
+    const response = await axiosInstance.put(`/orders/${orderId}/payment-method`, `"${paymentMethod}"`, {
+      headers: { "Content-Type": "application/json" }
+    });
+    return response.data;
+  }
+
   async getPendingKitchenItems(): Promise<KitchenTicketDto[]> {
     const response = await axiosInstance.get(`/orders/kitchen-tickets`);
     return response.data;

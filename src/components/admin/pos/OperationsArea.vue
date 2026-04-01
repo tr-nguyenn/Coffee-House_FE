@@ -57,6 +57,7 @@
           @open-table="handleOpenTable"
           @print-provisional="handlePrintProvisional"
           @add-customer="handleOpenCustomerModal"
+          @show-qr-modal="handleShowQrModal"
         />
       </div>
     </div>
@@ -130,7 +131,7 @@ onMounted(() => {
       if (existingOrder.value && existingOrder.value.id === orderId) {
         emit("order-success", "checkout");
       } else {
-        // Nếu thu ngân đổi sang Order khác rồi thì chỉ âm thầm F5 lại bản đồ bàn bên tay trái
+        // Cập nhật ngầm TableMap nếu thu ngân đang xem bàn khác
         emit("order-success", "update");
       }
 
@@ -327,37 +328,71 @@ const handlePrintProvisional = async (payload?: any) => {
   }, 100);
 };
 
+const pushQrToCustomerDisplay = (payload: any) => {
+  const STK = "15102000711111"; 
+  const BANK = "MBBank";
+  const qrUrl = `https://qr.sepay.vn/img?acc=${STK}&bank=${BANK}&amount=${payload.finalAmount}&des=${existingOrder.value.orderCode}`;
+  
+  const bc = new BroadcastChannel("pos-customer-channel");
+  bc.postMessage({
+    action: "SHOW_QR",
+    payload: {
+      orderId: existingOrder.value.id,
+      orderCode: existingOrder.value.orderCode,
+      amount: payload.finalAmount,
+      sepayQrUrl: qrUrl
+    }
+  });
+};
+
+const handleShowQrModal = () => {
+  if (!existingOrder.value || !lastPayload.value) return;
+  pushQrToCustomerDisplay(lastPayload.value);
+  toast.success("Đã đẩy lại mã QR ra Màn hình phụ!");
+};
+
 const handleCheckout = async (payload?: any) => {
   if (!existingOrder.value) return;
   const paymentMethod = payload?.paymentMethod || "Cash";
 
   if (paymentMethod === "Banking") {
-    // 1. Chuyển khoản -> Gọi QR Code chờ tiền về (Bắn qua màn hình khách quét)
-    lastPayload.value = payload; // Lưu cấu hình (voucher, point...) để in bill
-    
-    // GHI CHÚ: Thu ngân thay acc và bank thực tế của quán vào đây
-    const STK = "15102000711111"; 
-    const BANK = "MBBank";
-    const qrUrl = `https://qr.sepay.vn/img?acc=${STK}&bank=${BANK}&amount=${payload.finalAmount}&des=${existingOrder.value.orderCode}`;
-    
-    // Bắn ra Màn hình phụ cho khách
-    const bc = new BroadcastChannel("pos-customer-channel");
-    bc.postMessage({
-      action: "SHOW_QR",
-      payload: {
-        orderId: existingOrder.value.id,
-        orderCode: existingOrder.value.orderCode,
-        amount: payload.finalAmount,
-        sepayQrUrl: qrUrl
-      }
-    });
+    try {
+      lastPayload.value = payload;
+      
+      // 1. Lưu lại phương thức thanh toán xuống Database (Không chuyển status sang Completed)
+      await orderService.updatePaymentMethod(existingOrder.value.id, "Banking");
+      existingOrder.value.paymentMethod = "Banking";
+      emit("order-success", "update"); // Refresh lại TableMap sang màu Cam
+      
+      // 2. Bắn QR ra màn phụ
+      pushQrToCustomerDisplay(payload);
+      toast.info(`Đã hiển thị QR lên màn phụ! Đang chuẩn bị in hóa đơn mã QR...`);
 
-    toast.info(`Đã đẩy QR ${formatVND(payload.finalAmount)} ra Màn hình phụ! Hệ thống sẽ đóng bàn tự động sau khi khách chuyển tiền.`);
-    
-    // Lưu ý: Không emit("order-success", "checkout") ở đây nữa. Thu ngân vẫn ở lại bàn này chờ khách.
-    // Nếu muốn bán khách khác, thu ngân có thể bấm Bàn Trống bên trái.
+      // 3. Chuẩn bị In hóa đơn QR
+      orderToPrint.value = {
+        ...existingOrder.value,
+        paymentMethod: "Banking",
+        isProvisional: false, 
+        customerName: payload?.customerName || existingOrder.value.customerName,
+        discountAmount: payload?.discountAmount ?? existingOrder.value.discountAmount ?? 0,
+        finalAmount: payload?.finalAmount ?? existingOrder.value.finalAmount,
+        totalAmount: payload?.totalAmount ?? existingOrder.value.totalAmount,
+      };
+
+      await nextTick();
+      setTimeout(() => {
+        window.print();
+        
+        // 4. Xóa trắng giỏ hàng sau khi in xong (hoặc cancel)
+        emit("order-success", "checkout");
+        orderToPrint.value = null;
+      }, 500);
+
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Lỗi cập nhật phương thức thanh toán!");
+    }
   } else {
-    // 2. Tiền mặt / Thẻ -> Chốt đơn ngay
+    // Tiền mặt / Thẻ -> Chốt đơn ngay lập tức
     if (confirm(`Xác nhận thanh toán hóa đơn này bằng ${getPaymentMethodName(paymentMethod)}?`)) {
       try {
         await orderService.checkoutOrder(existingOrder.value.id, {
@@ -383,9 +418,9 @@ const handleCheckout = async (payload?: any) => {
           window.print();
           emit("order-success", "checkout");
           orderToPrint.value = null;
-        }, 100);
-      } catch (err) {
-        toast.error("Lỗi thanh toán!");
+        }, 500);
+      } catch (err: any) {
+        toast.error(err.response?.data?.message || "Lỗi thanh toán!");
       }
     }
   }

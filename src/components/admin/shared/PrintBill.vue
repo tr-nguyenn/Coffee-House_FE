@@ -85,6 +85,15 @@
         </div>
       </div>
 
+      <div v-if="order.paymentMethod === 'Banking'" class="text-center mt-3 mb-2">
+        <img
+          :src="`https://qr.sepay.vn/img?acc=15102000711111&bank=MBBank&amount=${order.finalAmount}&des=${order.orderCode}`"
+          alt="Mã QR"
+          style="width: 160px; height: 160px;"
+        />
+        <p class="mb-0 fw-bold mt-1" style="font-size: 11px;">Quét mã để thanh toán</p>
+      </div>
+
       <div class="text-center mt-3" style="font-size: 12px">
         <p class="fst-italic mb-0">Cảm ơn quý khách & Hẹn gặp lại!</p>
       </div>
