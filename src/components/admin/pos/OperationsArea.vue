@@ -105,12 +105,15 @@ const lastPayload = ref<any>(null);
 onMounted(() => {
   // Global listener: Bất kể thu ngân đang phục vụ bàn nào, nếu có SignalR báo "Đã nhận tiền"
   paymentService.startConnection(async (orderId: string, amount: number) => {
+    console.log("Đã nhận tín hiệu thanh toán", {orderId, amount});
     toast.success(`Hệ thống đã nhận tự động ${formatVND(amount)} từ khách chuyển khoản!`);
     
     // Nếu bàn hiện tại đang được chọn trùng với bàn vừa trả tiền -> Xóa trắng khu vực POS đi (Đóng bàn)
-    if (existingOrder.value && existingOrder.value.id === orderId) {
+    if (existingOrder.value && existingOrder.value.id.toLowerCase() === orderId.toLowerCase()) {
+      console.log("Kích hoạt gỡ bàn đang chọn");
       emit("order-success", "checkout");
     } else {
+      console.log("Kích hoạt tải lại danh sách bàn nền ngầm");
       // Cập nhật ngầm TableMap nếu thu ngân đang xem bàn khác
       emit("order-success", "update");
     }

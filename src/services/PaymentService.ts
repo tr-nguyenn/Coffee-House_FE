@@ -5,7 +5,16 @@ class PaymentService {
   private isConnected: boolean = false;
 
   public startConnection(onReceivePayment: (orderId: string, amount: number) => void) {
-    if (this.isConnected) return;
+    // Luôn luôn tháo listener cũ ra trước khi gắn cái mới vào (để tránh gọi 2 lần hoặc dính function cũ)
+    if (this.connection) {
+      this.connection.off("ReceivePayment");
+      this.connection.on("ReceivePayment", (orderId: string, amount: number) => {
+        console.log("ReceivePayment EVENT FIRED!", orderId, amount);
+        onReceivePayment(orderId, amount);
+      });
+    }
+
+    if (this.isConnected) return; // Nếu đã connect từ trước thì thôi ko start lại nữa
 
     // TODO: Thay thế 7144 bằng port backend thực tế của bạn
     const hubUrl = "https://localhost:7144/paymentHub";
