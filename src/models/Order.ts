@@ -28,6 +28,7 @@ export interface CreateOrderDto {
 export interface OrderResult {
   message: string;
   orderId: string;
+  orderCode: string;
   finalAmount: number;
   pointsEarned: number;
 }

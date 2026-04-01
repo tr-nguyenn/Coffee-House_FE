@@ -95,6 +95,11 @@ const router = createRouter({
       ],
     },
     {
+      path: "/customer-display",
+      name: "customer-display",
+      component: () => import("@/views/admin/CustomerDisplay.vue"),
+    },
+    {
       path: "/login",
       name: "login",
       component: () => import("@/views/LoginView.vue"),

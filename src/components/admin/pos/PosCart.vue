@@ -260,55 +260,14 @@
       </div>
 
       <div v-if="selectedTable" class="row g-1">
-        <template v-if="selectedTable.tableId !== 'TAKEAWAY'">
-          <div class="col-12" v-if="!selectedTable.isInUse">
-            <button class="btn btn-primary w-100 py-2 fw-bold shadow-sm" @click="emit('open-table')">
-              <i class="bi bi-unlock-fill me-1"></i> MỞ BÀN
-            </button>
-          </div>
-
-          <template v-else>
-            <div class="col-12 d-flex gap-1" v-if="cart.length > 0 || existingOrder">
-              <select
-                class="form-select form-select-sm bg-light fw-semibold"
-                v-model="selectedPaymentMethod"
-                style="width: 35%"
-              >
-                <option value="Cash">Tiền mặt</option>
-                <option value="Banking">Chuyển khoản</option>
-                <option value="Card">Thẻ / Ví</option>
-              </select>
-
-              <button
-                v-if="cart.length > 0"
-                class="btn btn-warning btn-sm flex-grow-1 fw-bold text-dark shadow-sm"
-                @click="emit('send-to-kitchen', getCheckoutPayload())"
-              >
-                <i class="bi bi-bell-fill"></i> BÁO BẾP
-              </button>
-
-              <template v-if="existingOrder && cart.length === 0">
-                <button
-                  class="btn btn-info btn-sm text-white fw-bold shadow-sm px-5"
-                  @click="emit('print-provisional', getCheckoutPayload())"
-                  title="In Tạm Tính"
-                >
-                  <i class="bi bi-printer-fill"></i>
-                  IN TẠM PHIẾU TÍNH
-                </button>
-                <button
-                  class="btn btn-success btn-sm flex-grow-1 fw-bold shadow-sm"
-                  @click="emit('checkout', getCheckoutPayload())"
-                >
-                  THANH TOÁN
-                </button>
-              </template>
-            </div>
-          </template>
-        </template>
+        <div class="col-12" v-if="!selectedTable.isInUse && selectedTable.tableId !== 'TAKEAWAY'">
+          <button class="btn btn-primary w-100 py-2 fw-bold shadow-sm" @click="emit('open-table')">
+            <i class="bi bi-unlock-fill me-1"></i> MỞ BÀN
+          </button>
+        </div>
 
         <template v-else>
-          <div class="col-12 d-flex gap-1" v-if="cart.length > 0">
+          <div class="col-12 d-flex gap-1" v-if="cart.length > 0 || existingOrder">
             <select
               class="form-select form-select-sm bg-light fw-semibold"
               v-model="selectedPaymentMethod"
@@ -318,12 +277,31 @@
               <option value="Banking">Chuyển khoản</option>
               <option value="Card">Thẻ / Ví</option>
             </select>
+
             <button
-              class="btn btn-success btn-sm flex-grow-1 fw-bold shadow-sm"
+              v-if="cart.length > 0"
+              class="btn btn-warning btn-sm flex-grow-1 fw-bold text-dark shadow-sm"
               @click="emit('send-to-kitchen', getCheckoutPayload())"
             >
-              TẠO ĐƠN
+              <i class="bi bi-bell-fill"></i> BÁO BẾP
             </button>
+
+            <template v-if="existingOrder && cart.length === 0">
+              <button
+                class="btn btn-info btn-sm text-white fw-bold shadow-sm px-5"
+                @click="emit('print-provisional', getCheckoutPayload())"
+                title="In Tạm Tính"
+              >
+                <i class="bi bi-printer-fill"></i>
+                IN TẠM PHIẾU TÍNH
+              </button>
+              <button
+                class="btn btn-success btn-sm flex-grow-1 fw-bold shadow-sm"
+                @click="emit('checkout', getCheckoutPayload())"
+              >
+                THANH TOÁN
+              </button>
+            </template>
           </div>
         </template>
       </div>

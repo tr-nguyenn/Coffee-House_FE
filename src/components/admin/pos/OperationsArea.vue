@@ -68,13 +68,15 @@
 </template>
 
 <script setup lang="ts">
-import {ref, watch, nextTick} from "vue";
+import {ref, watch, nextTick, onMounted, onUnmounted} from "vue";
+import {paymentService} from "@/services/PaymentService";
 import PrintBill from "../shared/PrintBill.vue";
 import PosMenu from "./PosMenu.vue";
 import PosCart from "./PosCart.vue";
 import CustomerModal from "@/components/admin/CustomerModal.vue";
 import {toast} from "@/utils/toast";
 import {orderService} from "@/services/OrderService";
+import {formatVND} from "@/utils/helpers";
 
 const props = defineProps<{selectedTable: any | null}>();
 const emit = defineEmits(["order-success"]);
@@ -95,6 +97,52 @@ const orderToPrint = ref<any>(null);
 
 // 👉 Khai báo biến Ref cho Modal Khách hàng
 const userModalRef = ref<any>(null);
+
+// 👉 Biến state cho Thanh toán QR (SePay)
+const lastPayload = ref<any>(null);
+
+onMounted(() => {
+  // Global listener: Bất kể thu ngân đang phục vụ bàn nào, nếu có SignalR báo "Đã nhận tiền" -> Tự động In Bill!
+  paymentService.startConnection(async (orderId: string, amount: number) => {
+    toast.success(`Hệ thống đã nhận tự động ${formatVND(amount)} từ khách chuyển khoản!`);
+    
+    // Tự động kéo Order Detail về từ Server để in (Tránh việc thu ngân đã chuyển sang bàn khác)
+    try {
+      const orderData = await orderService.getOrderById(orderId);
+      
+      orderToPrint.value = {
+        ...orderData,
+        paymentMethod: "Banking",
+        isProvisional: false,
+        customerName: orderData.customerName,
+        discountAmount: orderData.discountAmount ?? 0,
+        finalAmount: orderData.finalAmount,
+        totalAmount: orderData.totalAmount,
+      };
+
+      // In tự động và ẩn
+      setTimeout(() => {
+        window.print();
+        orderToPrint.value = null;
+      }, 500);
+
+      // Nếu bàn hiện tại đang được chọn trùng với bàn vừa trả tiền -> Xóa trắng khu vực POS đi (Đóng bàn)
+      if (existingOrder.value && existingOrder.value.id === orderId) {
+        emit("order-success", "checkout");
+      } else {
+        // Nếu thu ngân đổi sang Order khác rồi thì chỉ âm thầm F5 lại bản đồ bàn bên tay trái
+        emit("order-success", "update");
+      }
+
+    } catch (e) {
+      console.error("Lỗi khi fetch order in bill tự động", e);
+    }
+  });
+});
+
+onUnmounted(() => {
+  paymentService.stopConnection();
+});
 
 watch(
   () => props.selectedTable,
@@ -168,27 +216,52 @@ const handleSendToKitchen = async (payload?: any) => {
   }));
 
   try {
+    // 1. Nếu THÊM MÓN vào Đơn (Cả bàn thật và Takeaway đã có existingOrder)
+    if (existingOrder.value) {
+      await orderService.addItemsToOrder(existingOrder.value.id, {
+        newItems: itemsDto,
+      });
+      cart.value = [];
+      toast.success("Đã báo bếp món thêm!");
+      // Tải lại order hiện tại để hiển thị đầy đủ
+      existingOrder.value = await orderService.getOrderById(existingOrder.value.id);
+      return; 
+    }
+
+    // 2. Nếu TẠO MỚI cho Khách Mang Đi
     if (props.selectedTable.tableId === "TAKEAWAY") {
-      await orderService.createOrder({
+      // Báo bếp mang đi sẽ giả lập như Mở bàn, tạo bill "Unpaid" chứ chưa có thanh toán ngay
+      const res: any = await orderService.createOrder({
         tableId: null,
         items: itemsDto,
-        paymentMethod: payload?.paymentMethod || "Cash",
+        paymentMethod: "Unpaid", 
         customerId: payload?.customerId || null,
         customerName: payload?.customerName || null,
         customerPhone: payload?.customerPhone || null,
         note: "Takeaway",
-        pointsUsed: payload?.pointsUsed || 0, // 👉 Truyền số điểm đã xài xuống
+        pointsUsed: payload?.pointsUsed || 0,
         voucherId: payload?.voucherId || null,
       });
-      toast.success("Thanh toán mang đi thành công! Đã báo bếp.");
-    } else {
-      if (!props.selectedTable.isInUse || !props.selectedTable.activeOrderId)
-        return toast.warning("Vui lòng mở bàn trước khi gọi món!");
-      await orderService.addItemsToOrder(props.selectedTable.activeOrderId, {
-        newItems: itemsDto,
-      });
-      toast.success("Đã báo bếp món thêm!");
+
+      // Clear giỏ hàng nháp
+      cart.value = [];
+      
+      // Load hóa đơn vừa tạo vào màn hình hiện tại (để hiện ra nút THANH TOÁN giống hệt bàn thật)
+      try {
+        existingOrder.value = await orderService.getOrderById(res.id || res.orderId);
+      } catch (err: any) {
+        toast.error("Không thể load lại bill vừa tạo!");
+      }
+
+      toast.success("Đã báo bếp đơn mang đi! Vui lòng bấm Thanh toán.");
+      return;
+    } 
+    
+    // 3. Nghiệp vụ dự phòng (Lỗi không mở bàn mà đòi gọi móng)
+    if (!props.selectedTable.isInUse || !props.selectedTable.activeOrderId) {
+      return toast.warning("Vui lòng mở bàn trước khi gọi món!");
     }
+    
     cart.value = [];
     emit("order-success", "update");
   } catch (err: any) {
@@ -213,7 +286,32 @@ const getPaymentMethodName = (method: string) => {
 };
 
 const handlePrintProvisional = async (payload?: any) => {
-  if (!existingOrder.value) return;
+  if (!existingOrder.value) {
+    // Khách mang đi đang chọn món -> In form tạm tính mô phỏng
+    if (cart.value.length === 0) return toast.warning("Giỏ hàng đang trống!");
+    orderToPrint.value = {
+      orderCode: "TẠM TÍNH",
+      status: "Processing",
+      paymentMethod: payload?.paymentMethod || "Unpaid",
+      isProvisional: true,
+      customerName: payload?.customerName || "Khách mang đi",
+      discountAmount: payload?.discountAmount || 0,
+      finalAmount: payload?.finalAmount || 0,
+      totalAmount: payload?.totalAmount || 0,
+      orderDetails: cart.value.map(c => ({
+        productName: c.name,
+        quantity: c.quantity,
+        unitPrice: c.unitPrice
+      }))
+    };
+    await nextTick();
+    setTimeout(() => {
+      window.print();
+      orderToPrint.value = null;
+    }, 100);
+    return;
+  }
+
   orderToPrint.value = {
     ...existingOrder.value,
     isProvisional: true,
@@ -233,34 +331,62 @@ const handleCheckout = async (payload?: any) => {
   if (!existingOrder.value) return;
   const paymentMethod = payload?.paymentMethod || "Cash";
 
-  if (confirm(`Xác nhận thanh toán hóa đơn này bằng ${getPaymentMethodName(paymentMethod)}?`)) {
-    try {
-      await orderService.checkoutOrder(existingOrder.value.id, {
-        paymentMethod: paymentMethod,
-        customerId: payload?.customerId || null,
-        pointsUsed: payload?.pointsUsed || 0,
-        voucherId: payload?.voucherId || null,
-      });
-      toast.success("Thanh toán thành công!");
+  if (paymentMethod === "Banking") {
+    // 1. Chuyển khoản -> Gọi QR Code chờ tiền về (Bắn qua màn hình khách quét)
+    lastPayload.value = payload; // Lưu cấu hình (voucher, point...) để in bill
+    
+    // GHI CHÚ: Thu ngân thay acc và bank thực tế của quán vào đây
+    const STK = "15102000711111"; 
+    const BANK = "MBBank";
+    const qrUrl = `https://qr.sepay.vn/img?acc=${STK}&bank=${BANK}&amount=${payload.finalAmount}&des=${existingOrder.value.orderCode}`;
+    
+    // Bắn ra Màn hình phụ cho khách
+    const bc = new BroadcastChannel("pos-customer-channel");
+    bc.postMessage({
+      action: "SHOW_QR",
+      payload: {
+        orderId: existingOrder.value.id,
+        orderCode: existingOrder.value.orderCode,
+        amount: payload.finalAmount,
+        sepayQrUrl: qrUrl
+      }
+    });
 
-      orderToPrint.value = {
-        ...existingOrder.value,
-        paymentMethod: paymentMethod,
-        isProvisional: false,
-        customerName: payload?.customerName || existingOrder.value.customerName,
-        discountAmount: payload?.discountAmount ?? existingOrder.value.discountAmount ?? 0,
-        finalAmount: payload?.finalAmount ?? existingOrder.value.finalAmount,
-        totalAmount: payload?.totalAmount ?? existingOrder.value.totalAmount,
-      };
+    toast.info(`Đã đẩy QR ${formatVND(payload.finalAmount)} ra Màn hình phụ! Hệ thống sẽ đóng bàn tự động sau khi khách chuyển tiền.`);
+    
+    // Lưu ý: Không emit("order-success", "checkout") ở đây nữa. Thu ngân vẫn ở lại bàn này chờ khách.
+    // Nếu muốn bán khách khác, thu ngân có thể bấm Bàn Trống bên trái.
+  } else {
+    // 2. Tiền mặt / Thẻ -> Chốt đơn ngay
+    if (confirm(`Xác nhận thanh toán hóa đơn này bằng ${getPaymentMethodName(paymentMethod)}?`)) {
+      try {
+        await orderService.checkoutOrder(existingOrder.value.id, {
+          paymentMethod: paymentMethod,
+          customerId: payload?.customerId || null,
+          pointsUsed: payload?.pointsUsed || 0,
+          voucherId: payload?.voucherId || null,
+        });
+        toast.success("Thanh toán thành công!");
 
-      await nextTick();
-      setTimeout(() => {
-        window.print();
-        emit("order-success", "checkout");
-        orderToPrint.value = null;
-      }, 100);
-    } catch (err) {
-      toast.error("Lỗi thanh toán!");
+        orderToPrint.value = {
+          ...existingOrder.value,
+          paymentMethod: paymentMethod,
+          isProvisional: false,
+          customerName: payload?.customerName || existingOrder.value.customerName,
+          discountAmount: payload?.discountAmount ?? existingOrder.value.discountAmount ?? 0,
+          finalAmount: payload?.finalAmount ?? existingOrder.value.finalAmount,
+          totalAmount: payload?.totalAmount ?? existingOrder.value.totalAmount,
+        };
+
+        await nextTick();
+        setTimeout(() => {
+          window.print();
+          emit("order-success", "checkout");
+          orderToPrint.value = null;
+        }, 100);
+      } catch (err) {
+        toast.error("Lỗi thanh toán!");
+      }
     }
   }
 };

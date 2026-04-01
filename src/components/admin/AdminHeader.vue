@@ -18,11 +18,21 @@
         >
           <router-link
             to="/admin/pos"
-            class="nav-link cursor-pointer d-flex align-items-center gap-2 text-warning"
+            class="nav-link cursor-pointer d-flex align-items-center gap-2 text-warning fw-bold pe-2 border-end"
           >
             <i class="bi bi-shop fs-5"></i>
-            <span class="fw-bold nav-text letter-spacing-1">Bán hàng</span>
+            <span class="nav-text letter-spacing-1">Bán hàng</span>
           </router-link>
+          
+          <a
+            href="/customer-display"
+            target="_blank"
+            class="nav-link cursor-pointer d-flex align-items-center gap-2 text-primary ms-2"
+            title="Mở màn hình quét mã khách hàng trên Tab mới"
+          >
+            <i class="bi bi-display"></i>
+            <span class="nav-text" style="font-size: 0.85rem">Màn hình phụ</span>
+          </a>
         </div>
 
         <div
