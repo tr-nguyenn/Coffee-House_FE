@@ -103,40 +103,16 @@ const userModalRef = ref<any>(null);
 const lastPayload = ref<any>(null);
 
 onMounted(() => {
-  // Global listener: Bất kể thu ngân đang phục vụ bàn nào, nếu có SignalR báo "Đã nhận tiền" -> Tự động In Bill!
+  // Global listener: Bất kể thu ngân đang phục vụ bàn nào, nếu có SignalR báo "Đã nhận tiền"
   paymentService.startConnection(async (orderId: string, amount: number) => {
     toast.success(`Hệ thống đã nhận tự động ${formatVND(amount)} từ khách chuyển khoản!`);
     
-    // Tự động kéo Order Detail về từ Server để in (Tránh việc thu ngân đã chuyển sang bàn khác)
-    try {
-      const orderData = await orderService.getOrderById(orderId);
-      
-      orderToPrint.value = {
-        ...orderData,
-        paymentMethod: "Banking",
-        isProvisional: false,
-        customerName: orderData.customerName,
-        discountAmount: orderData.discountAmount ?? 0,
-        finalAmount: orderData.finalAmount,
-        totalAmount: orderData.totalAmount,
-      };
-
-      // In tự động và ẩn
-      setTimeout(() => {
-        window.print();
-        orderToPrint.value = null;
-      }, 500);
-
-      // Nếu bàn hiện tại đang được chọn trùng với bàn vừa trả tiền -> Xóa trắng khu vực POS đi (Đóng bàn)
-      if (existingOrder.value && existingOrder.value.id === orderId) {
-        emit("order-success", "checkout");
-      } else {
-        // Cập nhật ngầm TableMap nếu thu ngân đang xem bàn khác
-        emit("order-success", "update");
-      }
-
-    } catch (e) {
-      console.error("Lỗi khi fetch order in bill tự động", e);
+    // Nếu bàn hiện tại đang được chọn trùng với bàn vừa trả tiền -> Xóa trắng khu vực POS đi (Đóng bàn)
+    if (existingOrder.value && existingOrder.value.id === orderId) {
+      emit("order-success", "checkout");
+    } else {
+      // Cập nhật ngầm TableMap nếu thu ngân đang xem bàn khác
+      emit("order-success", "update");
     }
   });
 });
