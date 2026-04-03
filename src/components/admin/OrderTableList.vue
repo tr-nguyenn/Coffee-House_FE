@@ -16,6 +16,7 @@
             <th>Thời gian</th>
             <th>Bàn</th>
             <th>Khách hàng</th>
+            <th>Thu ngân</th>
             <th class="text-end">Tổng gốc</th>
             <th class="text-end">Giảm giá</th>
             <th class="text-end">Thực thu</th>
@@ -31,12 +32,14 @@
             >
               <td class="ps-3 fw-bold text-primary">{{ order.orderCode }}</td>
               <td class="small">{{ formatDateTime(order.createdAt) }}</td>
-              <td class="small fw-semibold">{{ order.tableName || "Khách mang đi" }}</td>
+              <td class="small fw-semibold">{{ order.tableName || "Mang đi" }}</td>
 
               <td class="small">
                 <span v-if="order.customerName" class="fw-semibold text-dark">{{ order.customerName }}</span>
                 <span v-else class="text-muted fst-italic">Khách lẻ</span>
               </td>
+
+              <td class="small fw-semibold text-secondary">{{ order.cashierName || "N/A" }}</td>
 
               <td class="text-end small fw-semibold text-secondary">
                 {{ formatVND(order.totalAmount || 0) }}
@@ -54,7 +57,7 @@
             </tr>
 
             <tr v-if="expandedOrderId === order.id">
-              <td colspan="8" class="p-0 border-bottom-0">
+              <td colspan="9" class="p-0 border-bottom-0">
                 <div class="bg-white p-3 border-start border-4 border-primary shadow-inner">
                   <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
@@ -62,11 +65,11 @@
                         <i class="bi bi-receipt me-1"></i> Chi tiết {{ order.orderCode }}
                       </h6>
                       <div class="text-muted small">
-                        Thu ngân: Admin • Thanh toán: {{ getPaymentName(order.paymentMethod) }}
+                        Thu ngân: <strong>{{ order.cashierName || "N/A" }}</strong> • Thanh toán: {{ getPaymentName(order.paymentMethod) }}
                       </div>
                     </div>
                     <div class="d-flex gap-2">
-                      <button class="btn btn-sm btn-outline-secondary" @click="emit('reprint', order)">
+                      <button class="btn btn-sm btn-outline-secondary" @click.stop="emit('reprint', order)">
                         <i class="bi bi-printer"></i> In lại Bill
                       </button>
                       <button v-if="order.status === 'Processing'" class="btn btn-sm btn-danger">
@@ -130,9 +133,14 @@
           </template>
 
           <tr v-if="!isLoading && orders.length === 0">
-            <td colspan="8" class="text-center py-5 text-muted">
-              <i class="bi bi-inbox display-4 opacity-25"></i>
-              <p class="mt-2">Không tìm thấy hóa đơn nào</p>
+            <td colspan="9" class="text-center py-5 text-muted">
+              <div class="d-flex flex-column align-items-center gap-2">
+                <i class="bi bi-inbox display-3 opacity-25"></i>
+                <h5 class="fw-bold mt-2 mb-1">Không tìm thấy hóa đơn nào</h5>
+                <p class="text-muted small mb-0" style="max-width: 320px">
+                  Không có hóa đơn nào phù hợp với bộ lọc hiện tại. Hãy thử thay đổi điều kiện lọc hoặc bấm "Làm mới" để xem tất cả.
+                </p>
+              </div>
             </td>
           </tr>
         </tbody>

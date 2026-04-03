@@ -46,7 +46,51 @@ class OrderService {
   }
 
   async getManagementOrders(params: any) {
-    const response = await axiosInstance.get("Orders/management", {params});
+    // Serialize mảng statuses thành query string chuẩn ASP.NET: statuses=A&statuses=B
+    const response = await axiosInstance.get("orders/management", {
+      params,
+      paramsSerializer: (p) => {
+        const parts: string[] = [];
+        for (const key of Object.keys(p)) {
+          const val = p[key];
+          if (val === undefined || val === null || val === "") continue;
+          if (Array.isArray(val)) {
+            val.forEach((v: any) => parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(v)}`));
+          } else {
+            parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(val)}`);
+          }
+        }
+        return parts.join("&");
+      },
+    });
+    return response.data;
+  }
+
+  // 👉 Lấy danh sách nhân viên cho dropdown lọc
+  async getStaffList(): Promise<{id: string; name: string}[]> {
+    const response = await axiosInstance.get("/staffs/simple-list");
+    return response.data;
+  }
+
+  // 👉 Xuất Excel (download file .xlsx)
+  async exportManagementOrdersExcel(params: any): Promise<Blob> {
+    const response = await axiosInstance.get("orders/management/export-excel", {
+      params,
+      responseType: "blob",
+      paramsSerializer: (p) => {
+        const parts: string[] = [];
+        for (const key of Object.keys(p)) {
+          const val = p[key];
+          if (val === undefined || val === null || val === "") continue;
+          if (Array.isArray(val)) {
+            val.forEach((v: any) => parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(v)}`));
+          } else {
+            parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(val)}`);
+          }
+        }
+        return parts.join("&");
+      },
+    });
     return response.data;
   }
 }

@@ -17,6 +17,7 @@
             class="form-control border-start-0"
             placeholder="Mã HĐ, Tên KH..."
             v-model="localFilters.search"
+            @keyup.enter="applyFilters"
           />
         </div>
       </div>
@@ -24,6 +25,7 @@
       <div class="mb-4">
         <label class="form-label small fw-bold text-muted">Thời gian</label>
         <select class="form-select form-select-sm mb-2 cursor-pointer" v-model="localFilters.timeRange">
+          <option value="">Tất cả</option>
           <option value="today">Hôm nay</option>
           <option value="yesterday">Hôm qua</option>
           <option value="thisWeek">Tuần này</option>
@@ -95,7 +97,7 @@
       </div>
 
       <div class="mb-4">
-        <label class="form-label small fw-bold text-muted">Người tạo (Nhân viên)</label>
+        <label class="form-label small fw-bold text-muted">Thu ngân (Nhân viên)</label>
         <select class="form-select form-select-sm cursor-pointer" v-model="localFilters.createdBy">
           <option value="">Tất cả nhân viên</option>
           <option v-for="staff in staffList" :key="staff.id" :value="staff.id">
@@ -104,49 +106,62 @@
         </select>
       </div>
     </div>
+
+    <!-- 👉 NÚT ÁP DỤNG BỘ LỌC -->
+    <div class="p-3 border-top bg-light">
+      <button class="btn btn-primary w-100 fw-bold shadow-sm" @click="applyFilters">
+        <i class="bi bi-check2-circle me-1"></i> Áp dụng bộ lọc
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {reactive, ref, watch} from "vue"; // 👉 Đã import thêm watch
+import {reactive, ref, onMounted} from "vue";
+import {orderService} from "@/services/OrderService";
 
 const emit = defineEmits(["apply-filter"]);
 
-const staffList = ref([
-  {id: "nv01", name: "Nguyễn Trung Nguyên"},
-  {id: "nv02", name: "Trần Văn B"},
-  {id: "nv03", name: "Lê Thị C"},
-]);
+const staffList = ref<{id: string; name: string}[]>([]);
+
+// Load danh sách nhân viên từ API khi Sidebar được mount
+onMounted(async () => {
+  try {
+    staffList.value = await orderService.getStaffList();
+  } catch (error) {
+    console.error("Lỗi tải danh sách nhân viên:", error);
+  }
+  // Gọi filter lần đầu khi trang mở (mặc định lấy tất cả)
+  applyFilters();
+});
 
 const defaultFilters = {
   search: "",
-  timeRange: "today",
+  timeRange: "",
   startDate: "",
   endDate: "",
-  statuses: ["Completed", "Processing"],
+  statuses: [] as string[],
   paymentMethod: "",
   createdBy: "",
 };
 
 const localFilters = reactive({...defaultFilters});
 
-let timeout: ReturnType<typeof setTimeout>;
-
-// 👉 MA THUẬT NẰM Ở ĐÂY: Lắng nghe mọi sự thay đổi của Form
-watch(
-  localFilters,
-  (newVal) => {
-    clearTimeout(timeout);
-    // Đợi 0.5s (500ms) sau khi user ngưng click/gõ thì mới báo cho Cha gọi API
-    timeout = setTimeout(() => {
-      emit("apply-filter", {...newVal});
-    }, 500);
-  },
-  {deep: true},
-);
+const applyFilters = () => {
+  emit("apply-filter", {...localFilters});
+};
 
 const resetFilters = () => {
-  Object.assign(localFilters, defaultFilters);
+  Object.assign(localFilters, {
+    search: "",
+    timeRange: "",
+    startDate: "",
+    endDate: "",
+    statuses: [],
+    paymentMethod: "",
+    createdBy: "",
+  });
+  applyFilters();
 };
 </script>
 

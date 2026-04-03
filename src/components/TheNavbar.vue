@@ -1,5 +1,5 @@
-<template>
-  <nav class="navbar navbar-expand-xl navbar-dark bg-dark sticky-top shadow-sm py-3">
+<template >
+  <nav class=" navbar navbar-expand-xl navbar-dark bg-dark sticky-top shadow-sm py-3">
     <div class="container">
       <router-link class="navbar-brand me-4" to="/" @click="closeMenu">
         <AppLogo size="30" />
