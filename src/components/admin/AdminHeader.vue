@@ -78,6 +78,9 @@
           <transition name="dropdown-fade">
             <div class="custom-dropdown shadow-xl" v-show="openDropdown === 'operation'">
               <router-link to="/admin/dashboard" class="dropdown-item"><i class="bi bi-speedometer2 me-3 text-info"></i> Tổng quan</router-link>
+              <router-link to="/admin/report-revenue" class="dropdown-item"><i class="bi bi-graph-up me-3 text-warning"></i> Doanh thu</router-link>
+              <router-link to="/admin/report-products" class="dropdown-item"><i class="bi bi-cup-hot me-3 text-success"></i> Sản phẩm</router-link>
+              <router-link to="/admin/report-peak-hours" class="dropdown-item"><i class="bi bi-clock-history me-3 text-danger"></i> Giờ cao điểm</router-link>
             </div>
           </transition>
         </div>
@@ -188,7 +191,7 @@ onUnmounted(() => {
 });
 
 const isPosActive = computed(() => route.name === "admin-pos");
-const isDashboardActive = computed(() => ["admin-dashboard"].includes(route.name as string));
+const isDashboardActive = computed(() => ["admin-dashboard", "admin-report-revenue", "admin-report-products", "admin-report-peak-hours"].includes(route.name as string));
 const isMenuActive = computed(() => ["admin-categories", "admin-products"].includes(route.name as string));
 const isAccountActive = computed(() => ["admin-users", "admin-staffs"].includes(route.name as string));
 const isSystemActive = computed(() => ["admin-areas", "admin-tables", "admin-invoices", "admin-vouchers", "admin-kitchen"].includes(route.name as string));

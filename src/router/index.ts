@@ -92,6 +92,24 @@ const router = createRouter({
           component: () => import("@/views/admin/KitchenView.vue"),
           meta: {roles: ["Admin", "Kitchen"]},
         },
+        {
+          path: "report-revenue",
+          name: "admin-report-revenue",
+          component: () => import("@/views/admin/RevenueReportView.vue"),
+          meta: {roles: ["Admin"]},
+        },
+        {
+          path: "report-products",
+          name: "admin-report-products",
+          component: () => import("@/views/admin/ProductReportView.vue"),
+          meta: {roles: ["Admin"]},
+        },
+        {
+          path: "report-peak-hours",
+          name: "admin-report-peak-hours",
+          component: () => import("@/views/admin/PeakHourReportView.vue"),
+          meta: {roles: ["Admin"]},
+        },
       ],
     },
     {
