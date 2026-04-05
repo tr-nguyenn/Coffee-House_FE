@@ -37,7 +37,7 @@
               <input class="form-check-input custom-check" type="checkbox" id="rememberMe" v-model="form.rememberMe" />
               <label class="form-check-label text-secondary small" for="rememberMe"> Ghi nhớ tôi </label>
             </div>
-            <a href="#" class="text-warning small text-decoration-none hover-link">Quên mật khẩu?</a>
+            <router-link to="/reset-password" class="text-warning small text-decoration-none hover-link">Quên mật khẩu?</router-link>
           </div>
 
           <button type="submit" class="btn btn-gold w-100 py-3 fw-bold rounded-3 shadow-sm" :disabled="isLoading">

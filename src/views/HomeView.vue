@@ -110,42 +110,6 @@ const displayedPages = computed(() => {
           </div>
         </div>
 
-        <!-- Phân trang (Pagination) -->
-        <div v-if="paging.totalPages > 1 && !loading" class="d-flex justify-content-center mt-5">
-          <nav aria-label="Page navigation">
-            <ul class="pagination pagination-lg mb-0">
-              <li class="page-item" :class="{disabled: !paging.hasPreviousPage}">
-                <button
-                  class="page-link shadow-sm bg-dark text-light border-secondary hover-bg-light"
-                  @click="changePage(paging.pageNumber - 1)"
-                  aria-label="Previous"
-                >
-                  <span aria-hidden="true">&laquo;</span>
-                </button>
-              </li>
-
-              <li
-                class="page-item"
-                v-for="page in displayedPages"
-                :key="page"
-                :class="{active: page === paging.pageNumber}"
-              >
-                <button class="page-link shadow-sm border-secondary" @click="changePage(page)">
-                  {{ page }}
-                </button>
-              </li>
-              <li class="page-item" :class="{disabled: !paging.hasNextPage}">
-                <button
-                  class="page-link shadow-sm bg-dark text-light border-secondary hover-bg-light"
-                  @click="changePage(paging.pageNumber + 1)"
-                  aria-label="Next"
-                >
-                  <span aria-hidden="true">&raquo;</span>
-                </button>
-              </li>
-            </ul>
-          </nav>
-        </div>
         <div class="text-center mt-5">
           <router-link
             to="/menu"

@@ -90,7 +90,6 @@
                           Trang quản trị
                         </router-link>
                       </li>
-                      <li><hr class="dropdown-divider border-secondary mx-3 my-1" /></li>
                     </template>
                     <template v-else-if="userRole === 'Kitchen'">
                       <li>
