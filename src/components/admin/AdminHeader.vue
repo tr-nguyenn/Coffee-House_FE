@@ -187,7 +187,6 @@ onUnmounted(() => {
   document.removeEventListener('click', closeUserMenuOnClickOutside);
 });
 
-// Logic trạng thái Active
 const isPosActive = computed(() => route.name === "admin-pos");
 const isDashboardActive = computed(() => ["admin-dashboard"].includes(route.name as string));
 const isMenuActive = computed(() => ["admin-categories", "admin-products"].includes(route.name as string));
@@ -196,12 +195,9 @@ const isSystemActive = computed(() => ["admin-areas", "admin-tables", "admin-inv
 </script>
 
 <style scoped>
-/* =========================================
-   KIẾN TRÚC HEADER TỔNG THỂ
-   ========================================= */
 .modern-admin-header {
-  height: 68px; /* Tăng nhẹ chiều cao cho thoáng */
-  background-color: #151521; /* Đen sâu sang trọng hơn */
+  height: 68px;
+  background-color: #151521;
   border-bottom: 1px solid #2b2b40;
   position: relative;
   z-index: 1050;
@@ -220,9 +216,6 @@ const isSystemActive = computed(() => ["admin-areas", "admin-tables", "admin-inv
   transform: scale(1.02);
 }
 
-/* =========================================
-   KHU VỰC ĐIỀU HƯỚNG TRUNG TÂM (NAVBAR)
-   ========================================= */
 .nav-divider {
   width: 1px;
   height: 24px;
@@ -269,12 +262,9 @@ const isSystemActive = computed(() => ["admin-areas", "admin-tables", "admin-inv
   cursor: pointer;
 }
 
-/* =========================================
-   MENU DROPDOWN CHUNG
-   ========================================= */
 .custom-dropdown {
   position: absolute;
-  top: calc(100% + 8px); /* Cách thanh nav 8px */
+  top: calc(100% + 8px); 
   left: 50%;
   transform: translateX(-50%);
   min-width: 220px;
@@ -285,7 +275,6 @@ const isSystemActive = computed(() => ["admin-areas", "admin-tables", "admin-inv
   z-index: 1060;
 }
 
-/* Mũi tên nhỏ chỉ lên trên menu */
 .custom-dropdown::before {
   content: '';
   position: absolute;
@@ -315,12 +304,9 @@ const isSystemActive = computed(() => ["admin-areas", "admin-tables", "admin-inv
 .dropdown-item:hover, .dropdown-item.router-link-active {
   background-color: rgba(255, 193, 7, 0.08);
   color: #ffc107;
-  transform: translateX(4px); /* Hiệu ứng trượt nhẹ đẹp mắt */
+  transform: translateX(4px);
 }
 
-/* =========================================
-   AVATAR BÊN PHẢI & MENU NGƯỜI DÙNG
-   ========================================= */
 .avatar-btn {
   width: 42px;
   height: 42px;
@@ -330,7 +316,7 @@ const isSystemActive = computed(() => ["admin-areas", "admin-tables", "admin-inv
   font-weight: 800;
   border: none;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Hiệu ứng nảy nhẹ */
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
 }
 
@@ -394,9 +380,6 @@ const isSystemActive = computed(() => ["admin-areas", "admin-tables", "admin-inv
   color: #ff6b6b !important;
 }
 
-/* =========================================
-   HIỆU ỨNG ANIMATION XỔ MENU CHUNG
-   ========================================= */
 .dropdown-fade-enter-active,
 .dropdown-fade-leave-active {
   transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
