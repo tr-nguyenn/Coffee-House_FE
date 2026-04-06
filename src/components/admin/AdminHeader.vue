@@ -62,6 +62,7 @@
               <router-link to="/admin/areas" class="dropdown-item"><i class="bi bi-map me-3 text-secondary"></i> Quản lý Khu vực</router-link>
               <router-link to="/admin/tables" class="dropdown-item"><i class="bi bi-table me-3 text-secondary"></i> Quản lý Bàn</router-link>
               <router-link to="/admin/invoices" class="dropdown-item"><i class="bi bi-receipt me-3 text-success"></i> Đơn hàng</router-link>
+              <router-link v-if="userRole === 'Quản trị viên'" to="/admin/inventory" class="dropdown-item"><i class="bi bi-box-seam me-3 text-primary"></i> Quản lý Kho</router-link>
               <router-link to="/admin/vouchers" class="dropdown-item"><i class="bi bi-ticket-perforated me-3 text-warning"></i> Voucher</router-link>
               <router-link to="/admin/kitchen" class="dropdown-item"><i class="bi bi-display me-3 text-danger"></i> Màn hình bếp</router-link>
             </div>
@@ -194,7 +195,7 @@ const isPosActive = computed(() => route.name === "admin-pos");
 const isDashboardActive = computed(() => ["admin-dashboard", "admin-report-revenue", "admin-report-products", "admin-report-peak-hours"].includes(route.name as string));
 const isMenuActive = computed(() => ["admin-categories", "admin-products"].includes(route.name as string));
 const isAccountActive = computed(() => ["admin-users", "admin-staffs"].includes(route.name as string));
-const isSystemActive = computed(() => ["admin-areas", "admin-tables", "admin-invoices", "admin-vouchers", "admin-kitchen"].includes(route.name as string));
+const isSystemActive = computed(() => ["admin-areas", "admin-tables", "admin-invoices", "admin-vouchers", "admin-kitchen", "admin-inventory"].includes(route.name as string));
 </script>
 
 <style scoped>

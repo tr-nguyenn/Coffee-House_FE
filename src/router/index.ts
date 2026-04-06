@@ -110,6 +110,12 @@ const router = createRouter({
           component: () => import("@/views/admin/PeakHourReportView.vue"),
           meta: {roles: ["Admin"]},
         },
+        {
+          path: "inventory",
+          name: "admin-inventory",
+          component: () => import("@/views/admin/InventoryView.vue"),
+          meta: { roles: ["Admin", "Staff"] },
+        },
       ],
     },
     {

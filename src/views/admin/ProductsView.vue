@@ -48,6 +48,19 @@
           </span>
         </div>
       </template>
+      
+      <template #col-recipe="{item}">
+        <div class="d-flex justify-content-center">
+          <button 
+            class="btn btn-sm btn-outline-warning fw-bold rounded-3" 
+            @click.stop="openRecipeSetting(item)" 
+            title="Cài đặt định lượng nguyên liệu"
+          >
+            <i class="bi bi-box-seam me-1"></i> Định lượng
+          </button>
+        </div>
+      </template>
+
     </BaseTable>
 
     <BasePagination
@@ -62,6 +75,12 @@
     <ProductModal ref="modalRef" @saved="fetchData(paging.pageNumber)" />
 
     <ProductDetailDrawer ref="detailDrawerRef" @edit="openModal" @delete="handleDelete" />
+
+    <ProductRecipeModal 
+      :show="showRecipeModal" 
+      :product="selectedProduct" 
+      @close="showRecipeModal = false" 
+    />
   </div>
 </template>
 
@@ -79,11 +98,15 @@ import BasePagination from "@/components/admin/shared/BasePagination.vue";
 import ProductModal from "@/components/admin/ProductModal.vue";
 import ProductDetailDrawer from "@/components/admin/ProductDetailDrawer.vue";
 
+// 👉 IMPORT FILE MODAL VÀO ĐÂY
+import ProductRecipeModal from "@/components/admin/ProductRecipeModal.vue";
+
 const productCols: TableColumn[] = [
   {label: "Tên sản phẩm", key: "name"},
   {label: "Giá bán", key: "price"},
   {label: "Danh mục", key: "category"},
   {label: "Trạng thái", key: "status"},
+  {label: "Định lượng", key: "recipe"}, // 👉 KHAI BÁO THÊM CỘT MỚI
 ];
 
 const products = ref<Product[]>([]);
@@ -91,6 +114,10 @@ const loading = ref(false);
 const modalRef = ref();
 const detailDrawerRef = ref();
 const searchKeyword = ref("");
+
+// 👉 STATE QUẢN LÝ MODAL ĐỊNH LƯỢNG
+const showRecipeModal = ref(false);
+const selectedProduct = ref<any>(null);
 
 const paging = reactive<PagingInfo>({
   pageNumber: 1,
@@ -118,7 +145,6 @@ const fetchData = async (page = 1) => {
 
     const data = result.data || result;
     products.value = data.items || [];
-    console.log(products.value);
     paging.totalCount = data.totalCount || 0;
   } catch (error) {
     console.error("Lỗi khi lấy dữ liệu:", error);
@@ -141,6 +167,12 @@ const openModal = (item?: Product) => {
 };
 const openDetail = (item: Product) => {
   detailDrawerRef.value?.show(item);
+};
+
+// 👉 HÀM MỞ MODAL ĐỊNH LƯỢNG
+const openRecipeSetting = (item: Product) => {
+  selectedProduct.value = item;
+  showRecipeModal.value = true;
 };
 
 const handleDelete = async (id: string) => {
