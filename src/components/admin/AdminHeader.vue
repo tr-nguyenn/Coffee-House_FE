@@ -16,10 +16,6 @@
         <router-link to="/admin/pos" class="nav-item d-flex align-items-center" :class="{active: isPosActive}">
           <i class="bi bi-shop me-2 fs-5"></i> Bán hàng
         </router-link>
-        
-        <a href="/customer-display" target="_blank" class="nav-item d-flex align-items-center text-info">
-          <i class="bi bi-display me-2 fs-5"></i> Màn hình phụ
-        </a>
 
         <div class="nav-divider mx-3"></div>
 
@@ -33,6 +29,21 @@
             <div class="custom-dropdown shadow-xl" v-show="openDropdown === 'menu'">
               <router-link to="/admin/categories" class="dropdown-item"><i class="bi bi-tags me-3 text-warning"></i> Danh mục</router-link>
               <router-link to="/admin/products" class="dropdown-item"><i class="bi bi-box-seam me-3 text-warning"></i> Sản phẩm</router-link>
+            </div>
+          </transition>
+        </div>
+
+        <div v-if="userRole === 'Quản trị viên'" class="nav-item-group h-100 position-relative d-flex align-items-center" 
+             @mouseenter="openDropdown = 'inventory'" 
+             @mouseleave="openDropdown = null">
+          <div class="nav-item d-flex align-items-center cursor-pointer" :class="{active: isInventoryActive}">
+            <i class="bi bi-boxes me-2 fs-5"></i> Kho hàng <i class="bi bi-chevron-down ms-1 icon-sm"></i>
+          </div>
+          <transition name="dropdown-fade">
+            <div class="custom-dropdown shadow-xl" v-show="openDropdown === 'inventory'">
+              <router-link to="/admin/inventory" class="dropdown-item"><i class="bi bi-box-seam me-3 text-primary"></i> Quản lý tồn kho</router-link>
+              <router-link to="/admin/inventory/import-history" class="dropdown-item"><i class="bi bi-arrow-down-circle me-3 text-success"></i> Lịch sử nhập hàng</router-link>
+              <router-link to="/admin/inventory/export-history" class="dropdown-item"><i class="bi bi-arrow-up-circle me-3 text-danger"></i> Lịch sử xuất hàng</router-link>
             </div>
           </transition>
         </div>
@@ -62,9 +73,9 @@
               <router-link to="/admin/areas" class="dropdown-item"><i class="bi bi-map me-3 text-secondary"></i> Quản lý Khu vực</router-link>
               <router-link to="/admin/tables" class="dropdown-item"><i class="bi bi-table me-3 text-secondary"></i> Quản lý Bàn</router-link>
               <router-link to="/admin/invoices" class="dropdown-item"><i class="bi bi-receipt me-3 text-success"></i> Đơn hàng</router-link>
-              <router-link v-if="userRole === 'Quản trị viên'" to="/admin/inventory" class="dropdown-item"><i class="bi bi-box-seam me-3 text-primary"></i> Quản lý Kho</router-link>
               <router-link to="/admin/vouchers" class="dropdown-item"><i class="bi bi-ticket-perforated me-3 text-warning"></i> Voucher</router-link>
               <router-link to="/admin/kitchen" class="dropdown-item"><i class="bi bi-display me-3 text-danger"></i> Màn hình bếp</router-link>
+              <a href="/customer-display" target="_blank" class="dropdown-item"><i class="bi bi-tv me-3 text-info"></i> Màn hình phụ</a>
             </div>
           </transition>
         </div>
@@ -194,11 +205,15 @@ onUnmounted(() => {
 const isPosActive = computed(() => route.name === "admin-pos");
 const isDashboardActive = computed(() => ["admin-dashboard", "admin-report-revenue", "admin-report-products", "admin-report-peak-hours"].includes(route.name as string));
 const isMenuActive = computed(() => ["admin-categories", "admin-products"].includes(route.name as string));
+// Thêm tính toán cho menu Kho hàng
+const isInventoryActive = computed(() => ["admin-inventory", "admin-inventory-import", "admin-inventory-export"].includes(route.name as string));
 const isAccountActive = computed(() => ["admin-users", "admin-staffs"].includes(route.name as string));
-const isSystemActive = computed(() => ["admin-areas", "admin-tables", "admin-invoices", "admin-vouchers", "admin-kitchen", "admin-inventory"].includes(route.name as string));
+// Đã loại admin-inventory ra khỏi hệ thống
+const isSystemActive = computed(() => ["admin-areas", "admin-tables", "admin-invoices", "admin-vouchers", "admin-kitchen"].includes(route.name as string));
 </script>
 
 <style scoped>
+/* Toàn bộ style cũ giữ nguyên không đổi */
 .modern-admin-header {
   height: 68px;
   background-color: #151521;
@@ -341,7 +356,6 @@ const isSystemActive = computed(() => ["admin-areas", "admin-tables", "admin-inv
   overflow: hidden;
 }
 
-/* Box thông tin tài khoản */
 .user-info-box {
   background-color: rgba(0,0,0,0.15);
   border-bottom: 1px solid #2b2b40;

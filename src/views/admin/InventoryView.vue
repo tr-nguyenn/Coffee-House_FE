@@ -7,61 +7,76 @@
       @add="openAddMaterialModal"
     />
 
-    <BaseTable
-      :columns="inventoryCols"
-      :items="paginatedMaterials"
-      :currentPage="paging.pageNumber"
-      :pageSize="paging.pageSize"
-      @edit="openEditModal"
-    >
-      <template #col-name="{item}">
-        <span class="fw-bold text-dark fs-6">{{ item.name }}</span>
-      </template>
+    <div class="card border-0 rounded-4 shadow-sm bg-white overflow-hidden mt-3 mb-3">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 custom-table">
+          <thead class="bg-light">
+            <tr class="text-secondary small uppercase" style="letter-spacing: 0.5px;">
+              <th class="ps-4 py-3 border-bottom-0" style="width: 25%; font-weight: 600;">Tên Vật Tư</th>
+              <th class="text-center py-3 border-bottom-0" style="width: 15%; font-weight: 600;">Đơn Vị</th>
+              <th class="text-end py-3 border-bottom-0" style="width: 15%; font-weight: 600;">Tồn Kho</th>
+              <th class="text-end py-3 border-bottom-0" style="width: 15%; font-weight: 600;">Cảnh Báo</th>
+              <th class="text-center py-3 border-bottom-0" style="width: 15%; font-weight: 600;">Trạng Thái</th>
+              <th class="text-end pe-4 py-3 border-bottom-0" style="width: 15%; font-weight: 600;">Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody class="border-top-0">
+            <tr v-if="isLoading">
+              <td colspan="6" class="text-center py-5 text-secondary">
+                <div class="spinner-border spinner-border-sm text-primary me-2"></div> Đang tải dữ liệu...
+              </td>
+            </tr>
+            
+            <tr v-else-if="paginatedMaterials.length === 0">
+              <td colspan="6" class="text-center py-5">
+                <div class="text-muted mb-2"><i class="bi bi-box-seam fs-2"></i></div>
+                <span class="text-secondary">Kho đang trống hoặc không tìm thấy vật tư!</span>
+              </td>
+            </tr>
 
-      <template #col-unit="{item}">
-        <div class="d-flex justify-content-center">
-          <span class="badge bg-light text-secondary border px-2 py-1">{{ item.unit }}</span>
-        </div>
-      </template>
-
-      <template #col-stockQuantity="{item}">
-        <div class="d-flex justify-content-end">
-          <span class="fw-bold fs-5" :class="item.stockQuantity <= item.minStockLevel ? 'text-danger' : 'text-success'">
-            {{ formatNumber(item.stockQuantity) }}
-          </span>
-        </div>
-      </template>
-
-      <template #col-minStockLevel="{item}">
-        <div class="d-flex justify-content-end">
-          <span class="text-muted fw-medium">{{ formatNumber(item.minStockLevel) }}</span>
-        </div>
-      </template>
-
-      <template #col-status="{item}">
-        <div class="d-flex justify-content-center">
-          <span v-if="item.stockQuantity <= item.minStockLevel" class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1 rounded-2">
-            <i class="bi bi-exclamation-triangle-fill me-1 small"></i> Sắp hết
-          </span>
-          <span v-else class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1 rounded-2">
-            <i class="bi bi-check-circle-fill me-1 small"></i> Ổn định
-          </span>
-        </div>
-      </template>
-
-      <template #col-actions="{item}">
-        <div class="d-flex justify-content-end">
-          <div class="btn-group shadow-sm rounded-3">
-            <button class="btn btn-sm btn-light border" @click.stop="openEditModal(item)" title="Sửa thông tin" data-bs-toggle="tooltip">
-              <i class="bi bi-pencil-square text-secondary"></i>
-            </button>
-            <button class="btn btn-sm btn-primary border-primary fw-medium" @click.stop="openImportModal(item)">
-              <i class="bi bi-box-arrow-in-down me-1"></i> Nhập hàng
-            </button>
-          </div>
-        </div>
-      </template>
-    </BaseTable>
+            <tr v-else v-for="item in paginatedMaterials" :key="item.id">
+              <td class="ps-4 py-3">
+                <span class="fw-bold text-dark fs-6">{{ item.name }}</span>
+              </td>
+              
+              <td class="text-center py-3">
+                <span class="badge bg-light text-secondary border px-2 py-1">{{ item.unit }}</span>
+              </td>
+              
+              <td class="text-end py-3">
+                <span class="fw-bold fs-5" :class="item.stockQuantity <= item.minStockLevel ? 'text-danger' : 'text-success'">
+                  {{ formatNumber(item.stockQuantity) }}
+                </span>
+              </td>
+              
+              <td class="text-end py-3 text-muted fw-medium">
+                {{ formatNumber(item.minStockLevel) }}
+              </td>
+              
+              <td class="text-center py-3">
+                <span v-if="item.stockQuantity <= item.minStockLevel" class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1 rounded-2">
+                  <i class="bi bi-exclamation-triangle-fill me-1 small"></i> Sắp hết
+                </span>
+                <span v-else class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1 rounded-2">
+                  <i class="bi bi-check-circle-fill me-1 small"></i> Ổn định
+                </span>
+              </td>
+              
+              <td class="text-end pe-4 py-3">
+                <div class="btn-group shadow-sm rounded-3">
+                  <button class="btn btn-sm btn-light border" @click="openEditModal(item)" title="Sửa thông tin" data-bs-toggle="tooltip">
+                    <i class="bi bi-pencil-square text-secondary"></i>
+                  </button>
+                  <button class="btn btn-sm btn-primary border-primary fw-medium" @click="openImportModal(item)">
+                    <i class="bi bi-box-arrow-in-down me-1"></i> Nhập hàng
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
     <BasePagination
       :total="paging.totalCount"
@@ -177,19 +192,9 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import { inventoryService } from '@/services/InventoryService';
 import { toast } from '@/utils/toast';
-import type { TableColumn, PagingInfo } from "@/types";
+import type { PagingInfo } from "@/types";
 import BaseToolbar from "@/components/admin/shared/BaseToolbar.vue";
-import BaseTable from "@/components/admin/shared/BaseTable.vue";
 import BasePagination from "@/components/admin/shared/BasePagination.vue";
-
-const inventoryCols: TableColumn[] = [
-  { label: "Tên Vật Tư", key: "name" },
-  { label: "Đơn Vị", key: "unit", align: "center" },
-  { label: "Tồn Kho Hiện Tại", key: "stockQuantity", align: "right" },
-  { label: "Mức Cảnh Báo", key: "minStockLevel", align: "right" },
-  { label: "Trạng Thái", key: "status", align: "center" },
-  { label: "Thao Tác", key: "actions", align: "right" }
-];
 
 const materials = ref<any[]>([]);
 const filteredMaterials = ref<any[]>([]);
@@ -346,6 +351,13 @@ const submitImportStock = async () => {
 </script>
 
 <style scoped>
+.custom-table th {
+  border-bottom: 2px solid #e9ecef;
+  letter-spacing: 0.5px;
+}
+.custom-table td {
+  padding: 1rem 0.5rem;
+}
 .uppercase {
   text-transform: uppercase;
   font-size: 0.8rem;
