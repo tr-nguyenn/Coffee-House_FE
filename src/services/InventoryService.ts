@@ -35,4 +35,10 @@ export const inventoryService = {
     const response = await apiClient.put(`/inventory/materials/${id}`, data);
     return response.data;
   },
+
+  // Lấy lịch sử xuất nhập kho
+  getTransactions: async (params?: { type?: number; materialId?: string; fromDate?: string; toDate?: string }) => {
+    const response = await apiClient.get("/inventory/transactions", { params });
+    return response.data;
+  },
 };

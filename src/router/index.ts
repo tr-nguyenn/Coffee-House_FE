@@ -116,6 +116,18 @@ const router = createRouter({
           component: () => import("@/views/admin/InventoryView.vue"),
           meta: { roles: ["Admin", "Staff"] },
         },
+        {
+          path: "inventory/import-history",
+          name: "admin-inventory-import",
+          component: () => import("@/views/admin/InventoryHistoryView.vue"),
+          meta: { roles: ["Admin", "Staff"], type: 1 },
+        },
+        {
+          path: "inventory/export-history",
+          name: "admin-inventory-export",
+          component: () => import("@/views/admin/InventoryHistoryView.vue"),
+          meta: { roles: ["Admin", "Staff"], type: 2 },
+        },
       ],
     },
     {
