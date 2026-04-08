@@ -12,6 +12,7 @@
       </main>
     </div>
     <TheToast />
+    <AIChatWidget />
   </div>
 </template>
 
@@ -20,6 +21,7 @@ import {computed} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import AdminHeader from "@/components/admin/AdminHeader.vue";
 import TheToast from "@/components/shared/TheToast.vue";
+import AIChatWidget from "@/components/admin/AIChatWidget.vue";
 
 const route = useRoute();
 const router = useRouter();
