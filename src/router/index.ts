@@ -19,6 +19,12 @@ const router = createRouter({
           name: "menu",
           component: () => import("@/views/MenuView.vue"),
         },
+        {
+          path: "profile",
+          name: "profile",
+          component: () => import("@/views/ProfileView.vue"),
+          meta: { requiresAuth: true }
+        },
       ],
     },
     {
@@ -217,6 +223,17 @@ router.beforeEach((to, _from, next) => {
       if (!allowedRoles.includes(userRole)) {
         return next("/not-found");
       }
+    }
+  } else if (to.meta && to.meta.requiresAuth) {
+    // NGƯỜI DÙNG BÌNH THƯỜNG YÊU CẦU ĐĂNG NHẬP (Vd: /profile)
+    if (!token) {
+      Swal.fire({
+        icon: "info",
+        title: "Yêu cầu đăng nhập",
+        text: "Bạn cần đăng nhập để truy cập trang này.",
+        confirmButtonColor: "#ffc107",
+      });
+      return next("/login");
     }
   }
 

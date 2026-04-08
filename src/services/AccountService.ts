@@ -38,6 +38,21 @@ class AccountService {
         const response = await axiosInstance.post(`/accounts/reset-password`, dto);
         return response.data;
     }
+
+    async getProfile(): Promise<any> {
+        const response = await axiosInstance.get(`/accounts/profile`);
+        return response.data.data;
+    }
+
+    async updateProfile(data: { fullName: string; phoneNumber: string }): Promise<any> {
+        const response = await axiosInstance.put(`/accounts/profile`, data);
+        return response.data;
+    }
+
+    async changePassword(data: { currentPassword: string; newPassword: string }): Promise<any> {
+        const response = await axiosInstance.put(`/accounts/profile/change-password`, data);
+        return response.data;
+    }
 }
 
 export const accountService = new AccountService();
