@@ -63,16 +63,18 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
-import { orderService, type KitchenTicketDto } from '@/services/OrderService';
+import { orderService } from '@/services/OrderService';
 import { toast } from '@/utils/toast';
+import type { KitchenTicketDto } from '@/models/Order';
+import { HubConnectionBuilder, LogLevel, type HubConnection } from '@microsoft/signalr';
 
 // const toast = useToast(); is no longer needed since we import the toast object directly
 const pendingTickets = ref<KitchenTicketDto[]>([]);
 const loading = ref(false);
 const processingId = ref<string | null>(null);
 const timerInterval = ref<number | undefined>(undefined);
-const fetchInterval = ref<number | undefined>(undefined);
 const now = ref(new Date().getTime());
+let connection: HubConnection | null = null;
 
 const fetchTickets = async () => {
   if (processingId.value) return; // Don't fetch while processing to avoid flickering
@@ -118,20 +120,54 @@ const formatWaitTime = (seconds: number): string => {
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 };
 
-onMounted(() => {
-  fetchTickets();
-  // Poll every 10 seconds
-  fetchInterval.value = window.setInterval(fetchTickets, 10000);
+onMounted(async () => {
+  await fetchTickets();
   
   // Update UI timer every second
   timerInterval.value = window.setInterval(() => {
     now.value = new Date().getTime();
   }, 3000);
+
+  // Setup SignalR Connection
+  connection = new HubConnectionBuilder()
+    .withUrl('https://localhost:7144/kitchenHub')
+    .withAutomaticReconnect()
+    .configureLogging(LogLevel.Information)
+    .build();
+
+  connection.on('RefreshKitchenTickets', async () => {
+    console.log('SignalR: Received RefreshKitchenTickets event');
+
+    await fetchTickets();
+
+    // Lưu lại số lượng đơn cũ trước khi lấy dữ liệu mới
+    const oldLength = pendingTickets.value.length;
+    
+    await fetchTickets(); // Lấy dữ liệu mới từ Server
+    
+    // Nếu số lượng đơn mới nhiều hơn đơn cũ -> Chắc chắn là có người vừa order
+    if (pendingTickets.value.length > oldLength) {
+        toast.info('Bếp ơi! Có đơn hàng mới kìa!');
+        
+        // (Tùy chọn) Sếp có thể thêm code chạy âm thanh "Ting Ting" ở đây nếu muốn
+        // const audio = new Audio('/sounds/ting-ting.mp3');
+        // audio.play().catch(e => console.log('Auto-play blocked by browser'));
+    }
+  });
+
+  try {
+    await connection.start();
+    console.log('SignalR: Connected to Kitchen Hub');
+  } catch (err) {
+    console.error('SignalR Connection Error: ', err);
+  }
 });
 
 onUnmounted(() => {
-  if (fetchInterval.value) window.clearInterval(fetchInterval.value);
   if (timerInterval.value) window.clearInterval(timerInterval.value);
+  if (connection) {
+    connection.stop();
+  }
 });
 </script>
 

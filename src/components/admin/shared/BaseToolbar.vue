@@ -1,14 +1,17 @@
 <template>
   <div class="toolbar-container d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-    <!-- Search Section -->
-    <div class="search-wrapper position-relative flex-grow-1" style="max-width: 420px;">
-      <i class="bi bi-search search-icon position-absolute top-50 translate-middle-y"></i>
-      <input
-        type="text"
-        class="form-control search-input shadow-none"
-        :placeholder="placeholder"
-        @input="$emit('search', ($event.target as HTMLInputElement).value)"
-      />
+    <!-- Search & Filters Section -->
+    <div class="d-flex flex-column flex-md-row gap-3 flex-grow-1">
+      <div class="search-wrapper position-relative" style="min-width: 250px; max-width: 420px;">
+        <i class="bi bi-search search-icon position-absolute top-50 translate-middle-y"></i>
+        <input
+          type="text"
+          class="form-control search-input shadow-none"
+          :placeholder="placeholder"
+          @input="$emit('search', ($event.target as HTMLInputElement).value)"
+        />
+      </div>
+      <slot name="filters"></slot>
     </div>
 
     <!-- Action Buttons -->

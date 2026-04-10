@@ -5,7 +5,19 @@
       btnLabel="Thêm sản phẩm"
       @search="onSearch"
       @add="openModal"
-    />
+    >
+      <template #filters>
+        <select class="form-select w-auto shadow-none text-muted" v-model="selectedCategory" @change="fetchData(1)" style="min-width: 160px; max-width: 250px; border-radius: 10px;">
+          <option value="">Tất cả danh mục</option>
+          <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+        </select>
+        <select class="form-select w-auto shadow-none text-muted" v-model="selectedStatus" @change="fetchData(1)" style="min-width: 160px; max-width: 200px; border-radius: 10px;">
+          <option value="">Tất cả trạng thái</option>
+          <option value="true">Đang bán</option>
+          <option value="false">Ngừng bán</option>
+        </select>
+      </template>
+    </BaseToolbar>
 
     <BaseTable
       :columns="productCols"
@@ -91,6 +103,7 @@ import {confirmDelete} from "@/utils/swal";
 import {formatVND} from "@/utils/helpers";
 import type {PagingInfo, TableColumn} from "@/types";
 import {productService} from "@/services/ProductService";
+import {categoryService} from "@/services/CategoryService";
 import type {Product} from "@/models/Product";
 import BaseToolbar from "@/components/admin/shared/BaseToolbar.vue";
 import BaseTable from "@/components/admin/shared/BaseTable.vue";
@@ -110,6 +123,9 @@ const productCols: TableColumn[] = [
 ];
 
 const products = ref<Product[]>([]);
+const categories = ref<any[]>([]);
+const selectedCategory = ref("");
+const selectedStatus = ref("");
 const loading = ref(false);
 const modalRef = ref();
 const detailDrawerRef = ref();
@@ -137,11 +153,15 @@ const fetchData = async (page = 1) => {
   loading.value = true;
   paging.pageNumber = page;
   try {
-    const result = await productService.getAll({
+    const payload: any = {
       pageNumber: paging.pageNumber,
       pageSize: paging.pageSize,
       search: searchKeyword.value,
-    });
+    };
+    if (selectedCategory.value) payload.categoryId = selectedCategory.value;
+    if (selectedStatus.value !== "") payload.isAvailable = selectedStatus.value === "true";
+
+    const result = await productService.getAll(payload);
 
     const data = result.data || result;
     products.value = data.items || [];
@@ -207,7 +227,13 @@ const handlePageChange = (newPage: number) => {
   fetchData(newPage);
 };
 
-onMounted(() => {
+onMounted(async () => {
+  try {
+    const res = await categoryService.getAll({ pageSize: 100 }); // Đảm bảo lấy đủ danh mục
+    categories.value = res.data?.items || res.items || res || [];
+  } catch (error) {
+    console.error("Lỗi lấy danh mục:", error);
+  }
   fetchData();
 });
 </script>
