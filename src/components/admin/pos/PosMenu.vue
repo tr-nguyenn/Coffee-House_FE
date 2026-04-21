@@ -50,7 +50,10 @@
         <div class="col" v-for="product in filteredProducts" :key="'grid-' + product.id">
           <div
             class="card h-100 shadow-sm border-0 product-card cursor-pointer rounded-3 overflow-hidden mx-2"
-            :class="{ 'opacity-50 user-select-none': !product.isAvailable }"
+            :class="{
+              'opacity-50 user-select-none': !product.isAvailable,
+              'product-out-of-stock': product.isAvailable && product.isOutOfStock
+            }"
             @click="handleAddToCart(product)"
           >
             <div
@@ -67,8 +70,16 @@
                 <span class="badge bg-danger" style="font-size: 0.65rem">Hết hàng</span>
               </div>
 
+              <!-- 👉 Badge cảnh báo tồn kho nguyên liệu -->
+              <div v-else-if="product.isOutOfStock" class="position-absolute top-0 end-0 p-1 z-3">
+                <span class="badge bg-danger" style="font-size: 0.65rem">Hết nguyên liệu</span>
+              </div>
+              <div v-else-if="product.maxAvailableServings !== undefined && product.maxAvailableServings >= 0 && product.maxAvailableServings <= 5" class="position-absolute top-0 end-0 p-1 z-3">
+                <span class="badge bg-warning text-dark" style="font-size: 0.65rem">Còn ~{{ product.maxAvailableServings }} ly</span>
+              </div>
+
               <div
-                v-if="product.isAvailable"
+                v-if="product.isAvailable && !product.isOutOfStock"
                 class="overlay d-flex align-items-center justify-content-center position-absolute w-100 h-100 top-0 start-0 transition-all text-white"
               >
                 <i class="bi bi-plus-circle-fill display-5"></i>
@@ -88,7 +99,10 @@
         <div class="col" v-for="product in filteredProducts" :key="'list-' + product.id">
           <div
             class="card h-100 shadow-sm border-0 product-compact-card cursor-pointer rounded-3"
-            :class="{ 'opacity-50 user-select-none': !product.isAvailable }"
+            :class="{
+              'opacity-50 user-select-none': !product.isAvailable,
+              'product-out-of-stock': product.isAvailable && product.isOutOfStock
+            }"
             @click="handleAddToCart(product)"
           >
             <div class="card-body p-2 d-flex align-items-center gap-2">
@@ -116,13 +130,15 @@
                     {{ product.name }}
                   </h6>
                   <span v-if="!product.isAvailable" class="badge bg-danger px-1" style="font-size: 0.6rem">Hết</span>
+                  <span v-else-if="product.isOutOfStock" class="badge bg-danger px-1" style="font-size: 0.6rem">Hết NL</span>
+                  <span v-else-if="product.maxAvailableServings !== undefined && product.maxAvailableServings >= 0 && product.maxAvailableServings <= 5" class="badge bg-warning text-dark px-1" style="font-size: 0.6rem">~{{ product.maxAvailableServings }} ly</span>
                 </div>
                 <span class="text-primary fw-bolder mt-1" style="font-size: 0.85rem">
                   {{ formatVND(product.price) }}
                 </span>
               </div>
 
-              <div v-if="product.isAvailable" class="ms-auto pe-1 text-primary opacity-50 add-icon transition-all">
+              <div v-if="product.isAvailable && !product.isOutOfStock" class="ms-auto pe-1 text-primary opacity-50 add-icon transition-all">
                 <i class="bi bi-plus-circle-fill fs-5"></i>
               </div>
             </div>
@@ -235,8 +251,12 @@ const getImageUrl = (url?: string) => {
 
 const handleAddToCart = (product: Product) => {
   if (!product.isAvailable) {
-    toast.warning("Món này hiện đang hết hàng!");
+    toast.warning("Món này hiện đang ngừng bán!");
     return;
+  }
+  // Cảnh báo mềm khi hết nguyên liệu (vẫn cho thêm, Backend sẽ chặn cứng nếu cần)
+  if (product.isOutOfStock) {
+    toast.warning(`Món "${product.name}" đã hết nguyên liệu! Hệ thống sẽ kiểm tra khi gửi bếp.`);
   }
   emit('add-to-cart', product);
 };
@@ -292,6 +312,15 @@ const filteredProducts = computed(() => {
 }
 .product-card:active {
   transform: translateY(-1px);
+}
+
+/* Trạng thái hết nguyên liệu */
+.product-out-of-stock {
+  border: 2px solid #dc3545 !important;
+  opacity: 0.65;
+}
+.product-out-of-stock:hover {
+  opacity: 0.8;
 }
 
 .product-compact-card {

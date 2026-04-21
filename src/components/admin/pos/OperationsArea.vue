@@ -76,6 +76,7 @@ import PosMenu from "./PosMenu.vue";
 import PosCart from "./PosCart.vue";
 import CustomerModal from "@/components/admin/CustomerModal.vue";
 import {toast} from "@/utils/toast";
+import {confirmAction} from "@/utils/swal";
 import {orderService} from "@/services/OrderService";
 import {formatVND} from "@/utils/helpers";
 
@@ -372,7 +373,13 @@ const handleCheckout = async (payload?: any) => {
     }
   } else {
     // Tiền mặt / Thẻ -> Chốt đơn ngay lập tức
-    if (confirm(`Xác nhận thanh toán hóa đơn này bằng ${getPaymentMethodName(paymentMethod)}?`)) {
+    const result = await confirmAction(
+      "Xác nhận thanh toán",
+      `Xác nhận thanh toán hóa đơn này bằng ${getPaymentMethodName(paymentMethod)}?`,
+      "question"
+    );
+
+    if (result.isConfirmed) {
       try {
         await orderService.checkoutOrder(existingOrder.value.id, {
           paymentMethod: paymentMethod,

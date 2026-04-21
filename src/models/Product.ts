@@ -11,4 +11,6 @@ export interface Product extends BaseModel {
   category?: Category;
   categoryName?: string;
   isAvailable: boolean;
+  maxAvailableServings?: number;  // -1 = không có recipe (không giới hạn)
+  isOutOfStock?: boolean;
 }

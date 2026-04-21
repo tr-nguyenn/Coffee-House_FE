@@ -111,7 +111,12 @@
           <template v-else>
             <div class="row g-4 mb-4">
               <div v-for="product in paginatedProducts" :key="product.id" class="col-sm-6 col-xl-4">
-                <div class="card h-100 shadow-sm product-card rounded-4 d-flex flex-column custom-dark-card" :class="{'opacity-75': !product.isAvailable}">
+                <div class="card h-100 shadow-sm product-card rounded-4 d-flex flex-column custom-dark-card"
+                  :class="{
+                    'opacity-75': !product.isAvailable,
+                    'product-out-of-stock': product.isAvailable && product.isOutOfStock
+                  }"
+                >
                   <div class="position-relative product-img-wrapper" style="background-color: #000;">
                     <img 
                        :src="getImageUrl(product.imageUrl)" 
@@ -124,9 +129,17 @@
                         v-if="!product.isAvailable" 
                         class="badge bg-danger shadow-sm px-3 py-2 rounded-pill fw-bold"
                       >Hết hàng</span>
+                      <span 
+                        v-else-if="product.isOutOfStock" 
+                        class="badge bg-danger shadow-sm px-3 py-2 rounded-pill fw-bold"
+                      >Tạm hết</span>
+                      <span 
+                        v-else-if="product.maxAvailableServings !== undefined && product.maxAvailableServings >= 0 && product.maxAvailableServings <= 5" 
+                        class="badge bg-warning text-dark shadow-sm px-3 py-2 rounded-pill fw-bold"
+                      >Còn khoảng: {{ product.maxAvailableServings }} ly</span>
                     </div>
                     <div class="product-overlay d-flex align-items-center justify-content-center">
-                       <button class="btn btn-light rounded-circle shadow add-overlay-btn" :disabled="!product.isAvailable" title="Thêm vào giỏ hàng">
+                       <button class="btn btn-light rounded-circle shadow add-overlay-btn" :disabled="!product.isAvailable || product.isOutOfStock" title="Thêm vào giỏ hàng">
                           <i class="bi bi-cart-plus-fill fs-4 text-warning"></i>
                        </button>
                     </div>
@@ -143,7 +156,7 @@
                     
                     <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top border-secondary border-opacity-50">
                       <div class="fw-bold fs-5" style="color: #d97706">{{ formatVND(product.price) }}</div>
-                      <button class="btn btn-warning btn-sm rounded-circle shadow-sm add-btn d-flex align-items-center justify-content-center" :disabled="!product.isAvailable" style="width: 36px; height: 36px;">
+                      <button class="btn btn-warning btn-sm rounded-circle shadow-sm add-btn d-flex align-items-center justify-content-center" :disabled="!product.isAvailable || product.isOutOfStock" style="width: 36px; height: 36px;">
                         <i class="bi bi-plus-lg fw-bold text-dark"></i>
                       </button>
                     </div>
@@ -503,5 +516,15 @@ const getImageUrl = (url?: string | null) => {
 }
 .hover-bg-light:hover:not(:disabled) {
   background-color: #343a40 !important;
+}
+
+/* Trạng thái hết nguyên liệu */
+.product-out-of-stock {
+  border-color: #dc3545 !important;
+  opacity: 0.6;
+}
+.product-out-of-stock:hover {
+  opacity: 0.75;
+  transform: translateY(-4px);
 }
 </style>
